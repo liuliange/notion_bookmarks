@@ -5,6 +5,7 @@ import React, { useState, useEffect, useMemo, memo } from "react";
 import LinkCard from "@/components/ui/LinkCard";
 import * as Icons from "lucide-react";
 import { Link, Category } from '@/types';
+import { useSearchContext } from '@/components/search-context';
 
 interface LinkContainerProps {
   initialLinks: Link[];
@@ -18,53 +19,72 @@ const LinkContainer = memo(function LinkContainer({
   categories,
 }: LinkContainerProps) {
   const [mounted, setMounted] = useState(false);
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const { searchQuery } = useSearchContext();
 
   useEffect(() => {
     setMounted(true);
-    setCurrentTime(new Date());
+    const now = new Date();
+    setCurrentTime(
+      now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(/\//g, '-')
+    );
   }, []);
 
-  // 按一级和二级分类组织链接，只包含启用的分类
-  const linksByCategory = useMemo(() => initialLinks.reduce((acc, link) => {
-    const cat1 = link.category1;
-    const cat2 = link.category2;
+  const linksByCategory = useMemo(() => {
+    const filteredLinks = initialLinks.filter((link) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.trim().toLowerCase();
+      const title = (link.name || '').toLowerCase();
+      const desc = (link.desc || '').toLowerCase();
+      const category1 = (link.category1 || '').toLowerCase();
+      const category2 = (link.category2 || '').toLowerCase();
+      return title.includes(query) || desc.includes(query) || 
+             category1.includes(query) || category2.includes(query);
+    });
 
-    if (enabledCategories.has(cat1)) {
-      if (!acc[cat1]) {
-        acc[cat1] = {};
+    return filteredLinks.reduce((acc, link) => {
+      const cat1 = link.category1;
+      const cat2 = link.category2;
+      if (enabledCategories.has(cat1)) {
+        if (!acc[cat1]) acc[cat1] = {};
+        if (!acc[cat1][cat2]) acc[cat1][cat2] = [];
+        acc[cat1][cat2].push(link);
       }
-      if (!acc[cat1][cat2]) {
-        acc[cat1][cat2] = [];
-      }
-      acc[cat1][cat2].push(link);
-    }
-    return acc;
-  }, {} as Record<string, Record<string, Link[]>>), [initialLinks, enabledCategories]);
+      return acc;
+    }, {} as Record<string, Record<string, Link[]>>);
+  }, [initialLinks, enabledCategories, searchQuery]);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).replace(/\//g, '-');
-  };
+  const totalMatches = useMemo(() => {
+    return Object.values(linksByCategory).reduce((acc, subMap) => {
+      return acc + Object.values(subMap).reduce((sum, links) => sum + links.length, 0);
+    }, 0);
+  }, [linksByCategory]);
 
   return (
     <div className="space-y-16 pb-12 w-full min-w-0">
+      {searchQuery.trim() && (
+        <div className="text-sm text-muted-foreground border-b pb-2">
+          找到 <span className="font-medium text-foreground">{totalMatches}</span> 个相关结果
+        </div>
+      )}
+
       {categories.map((category) => {
         const categoryLinks = linksByCategory[category.name];
         if (!categoryLinks) return null;
 
         return (
           <section key={category.id} id={category.id} className="space-y-8">
-            <div className="section-heading flex items-center gap-3 pb-2 border-b">
+            <div className="flex items-center space-x-3 pb-2 border-b">
               {category.iconName &&
               Icons[category.iconName as keyof typeof Icons] ? (
-                <div className="section-heading-icon w-7 h-7 p-1 rounded-lg bg-primary/5 text-primary">
+                <div className="w-7 h-7 p-1 rounded-lg bg-primary/5 text-primary">
                   {React.createElement(
                     Icons[
                       category.iconName as keyof typeof Icons
@@ -73,7 +93,7 @@ const LinkContainer = memo(function LinkContainer({
                   )}
                 </div>
               ) : null}
-              <h2 className="section-heading-title text-2xl font-bold tracking-tight">{category.name}</h2>
+              <h2 className="text-2xl font-bold tracking-tight">{category.name}</h2>
             </div>
 
             <div className="space-y-12">
@@ -105,9 +125,29 @@ const LinkContainer = memo(function LinkContainer({
           </section>
         );
       })}
+
+      {searchQuery.trim() && totalMatches === 0 && (
+        <div className="text-center py-12">
+          <p className="text-sm text-muted-foreground">
+            没有找到与“<span className="font-medium text-foreground">{searchQuery.trim()}</span>”相关的结果，
+            添加客服微信 <span className="font-medium">525821377</span> 帮忙查询，
+            或
+            <a 
+              href="https://jianpianyi.cn" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block ml-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors no-underline"
+            >
+              点击这里
+            </a>
+            前往首页查看更多优惠
+          </p>
+        </div>
+      )}
+
       {mounted && currentTime && (
         <div className="mt-12 text-center text-sm text-muted-foreground">
-          最近更新：{formatDate(currentTime)}
+          最近更新：{currentTime}
         </div>
       )}
     </div>

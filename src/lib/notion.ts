@@ -55,16 +55,13 @@ export const getLinks = cache(async () => {
 
         // 对链接进行排序：先按是否置顶，再按创建时间
         allLinks.sort((a, b) => {
-            // 检查是否包含"力荐👍"
             const aIsTop = a.tags.includes('力荐👍');
             const bIsTop = b.tags.includes('力荐👍');
 
-            // 如果置顶状态不同，置顶的排在前面
             if (aIsTop !== bIsTop) {
                 return aIsTop ? -1 : 1;
             }
 
-            // 如果置顶状态相同，按创建时间逆序排序
             return new Date(b.created).getTime() - new Date(a.created).getTime();
         });
 
@@ -92,7 +89,6 @@ export const getWebsiteConfig = cache(async () => {
             }
         });
 
-        // 获取配置数据库页面的图标作为网站图标
         const database = await notion.databases.retrieve({
             database_id: envConfig.NOTION_WEBSITE_CONFIG_ID!
         }) as GetDatabaseResponse;
@@ -102,7 +98,6 @@ export const getWebsiteConfig = cache(async () => {
         const fullDatabase = database as DatabaseObjectResponse;
         if (fullDatabase.icon) {
             if (fullDatabase.icon.type === 'emoji') {
-                // 如果是 emoji，生成 data URL
                 favicon = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${fullDatabase.icon.emoji}</text></svg>`;
             } else if (fullDatabase.icon.type === 'file' && fullDatabase.icon.file) {
                 favicon = fullDatabase.icon.file.url;
@@ -111,9 +106,6 @@ export const getWebsiteConfig = cache(async () => {
             }
         }
 
-        // 返回基础配置
-        // 将配置对象转换为 WebsiteConfig 类型
-        // 注意：这里我们保留原有逻辑，将动态获取的配置与默认值合并
         const config: WebsiteConfig = {
             // 基础配置
             SITE_TITLE: configMap.SITE_TITLE ?? '我的导航',
@@ -133,6 +125,11 @@ export const getWebsiteConfig = cache(async () => {
             SOCIAL_JIKE: configMap.SOCIAL_JIKE ?? '',
             SOCIAL_WEIBO: configMap.SOCIAL_WEIBO ?? '',
             SOCIAL_XIAOHONGSHU: configMap.SOCIAL_XIAOHONGSHU ?? '',
+            SOCIAL_WECHAT: configMap.SOCIAL_WECHAT ?? '',
+            SOCIAL_DOUYIN: configMap.SOCIAL_DOUYIN ?? '',
+            SOCIAL_SHOPEE: configMap.SOCIAL_SHOPEE ?? '',   // ✅ 已修正
+            SOCIAL_BUY: configMap.SOCIAL_BUY ?? '',
+            SOCIAL_QQ: configMap.SOCIAL_QQ ?? '',
             // 分析和统计
             CLARITY_ID: configMap.CLARITY_ID ?? '',
             GA_ID: configMap.GA_ID ?? '',

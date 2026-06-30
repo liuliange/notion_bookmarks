@@ -1,3 +1,4 @@
+import { SearchProvider } from '@/components/search-context';
 import "./globals.css"
 import "qweather-icons/font/qweather-icons.css"
 import "@/themes/theme.css"
@@ -77,7 +78,9 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider>
-          {children}
+          <SearchProvider>
+            {children}
+          </SearchProvider>
           <Analytics />
           <SpeedInsights />
         </ThemeProvider>

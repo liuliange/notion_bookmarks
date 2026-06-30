@@ -1,4 +1,3 @@
-// 默认配置
 export const defaultConfig = {
     // 基础配置
     SITE_TITLE: 'Notion 导航站',
@@ -11,7 +10,12 @@ export const defaultConfig = {
     SOCIAL_X: '',
     SOCIAL_JIKE: '',
     SOCIAL_WEIBO: '',
-    SOCIAL_XIAOHONGSHU: ''
+    SOCIAL_XIAOHONGSHU: '',
+    SOCIAL_WECHAT: '',
+    SOCIAL_DOUYIN: '',
+    SOCIAL_QQ: '',
+    SOCIAL_BUY: '',
+    SOCIAL_SHOP: '',
 } as const;
 
 // 环境变量配置
