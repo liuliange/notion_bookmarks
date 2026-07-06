@@ -32,6 +32,11 @@ const HotNews = dynamic(() => import('@/components/widgets/HotNews'), {
   ssr: false
 });
 
+const StockWatchlist = dynamic(() => import('@/components/widgets/StockWatchlist'), {
+  loading: () => <WidgetSkeleton className="w-[340px] h-[150px]" />,
+  ssr: false
+});
+
 interface HomeWidgetsProps {
     config: WebsiteConfig;
 }
@@ -43,10 +48,11 @@ export default function HomeWidgets({ config }: HomeWidgetsProps) {
         '天气': <Weather />,
         'IP信息': <IPInfo />,
         '热搜': <HotNews />,
+        '自选股': <StockWatchlist />,
     };
 
     const widgetConfig = config.WIDGET_CONFIG?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
-    
+
     return (
         <div className="hidden lg:block w-full mb-8">
             <motion.div
