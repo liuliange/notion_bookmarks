@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo } from 'react'
+import React, { memo, useState, useEffect } from 'react'
 import { WebsiteConfig } from '@/types'
 import { FaGithub, FaXTwitter } from 'react-icons/fa6'
 import { cn } from '@/lib/utils'
@@ -11,8 +11,79 @@ interface FooterProps {
 }
 
 const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  // 🆕 判断是否为移动端
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    // 🆕 检查屏幕宽度
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
+
+  useEffect(() => {
+    // 🆕 如果不是移动端，不启用滚动显隐逻辑
+    if (!isMobile) return
+
+    const checkHeight = () => {
+      const isShortPage = document.documentElement.scrollHeight <= window.innerHeight
+      if (isShortPage) {
+        setIsVisible(true)
+      }
+    }
+    checkHeight()
+
+    let ticking = false
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY
+          const scrollDelta = currentScrollY - lastScrollY
+          const threshold = 10
+
+          if (currentScrollY < 50) {
+            setIsVisible(true)
+          } else if (scrollDelta > threshold) {
+            setIsVisible(false)
+          } else if (scrollDelta < -threshold) {
+            setIsVisible(true)
+          }
+
+          setLastScrollY(currentScrollY)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', checkHeight)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', checkHeight)
+    }
+  }, [lastScrollY, isMobile])
+
   return (
-    <footer className={`fixed bottom-0 left-0 right-0 bg-background border-t py-2 md:py-4 z-10 ${className}`}>
+    <footer
+      className={cn(
+        "fixed bottom-0 left-0 right-0 bg-background border-t py-2 md:py-4 z-10 transition-transform duration-300 ease-in-out",
+        // 🆕 移动端：滑动控制显隐；桌面端：始终显示
+        isMobile ? (isVisible ? "translate-y-0" : "translate-y-full") : "translate-y-0",
+        className
+      )}
+    >
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-1 md:gap-4 md:flex-row md:justify-between">
           <div className="flex items-center space-x-4">
@@ -218,7 +289,7 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
             <p className="hidden md:block text-sm text-muted-foreground">
             </p>
             <p className="text-sm text-muted-foreground">
-              2024 {config.SITE_AUTHOR}. All rights reserved.
+              {config.SITE_AUTHOR} · 你的省钱生活指南
             </p>
           </div>
         </div>

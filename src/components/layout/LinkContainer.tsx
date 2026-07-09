@@ -80,7 +80,11 @@ const LinkContainer = memo(function LinkContainer({
         if (!categoryLinks) return null;
 
         return (
-          <section key={category.id} id={category.id} className="space-y-8">
+          <section
+            key={category.id}
+            id={category.id}
+            className="category-section scroll-mt-20 space-y-8"
+          >
             <div className="flex items-center space-x-3 pb-2 border-b">
               {category.iconName &&
               Icons[category.iconName as keyof typeof Icons] ? (
@@ -132,9 +136,9 @@ const LinkContainer = memo(function LinkContainer({
             没有找到与“<span className="font-medium text-foreground">{searchQuery.trim()}</span>”相关的结果，
             添加客服微信 <span className="font-medium">525821377</span> 帮忙查询，
             或
-            <a 
-              href="https://jianpianyi.cn" 
-              target="_blank" 
+            <a
+              href="https://jianpianyi.cn"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-block ml-1 px-2 py-0.5 rounded-full text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors no-underline"
             >
