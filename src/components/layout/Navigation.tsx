@@ -39,10 +39,7 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const { theme } = useTheme()
   
-  // 🆕 移动端菜单滚动容器引用
   const mobileMenuRef = useRef<HTMLDivElement>(null)
-  // 🆕 滚动联动索引
-  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     setMounted(true)
@@ -85,7 +82,7 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
     }
   }, [categories, activeCategory])
 
-  // 🆕 滚动联动：监听滚动，自动高亮并滚动分类菜单
+  // 滚动联动：监听滚动，自动高亮并滚动分类菜单
   useEffect(() => {
     if (typeof window === 'undefined' || categories.length === 0) return
 
@@ -95,14 +92,12 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          // 获取所有分类区块
           const sections = document.querySelectorAll('.category-section')
           if (sections.length === 0) {
             ticking = false
             return
           }
 
-          // 计算当前可见的分类
           const scrollPos = window.scrollY + window.innerHeight / 3
           let newIndex = 0
 
@@ -114,13 +109,10 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
             }
           })
 
-          // 如果索引变化，更新菜单
           if (newIndex !== currentIndex && categories[newIndex]) {
             currentIndex = newIndex
-            setActiveIndex(newIndex)
             setActiveCategory(categories[newIndex].id)
 
-            // 同步滚动移动端菜单
             if (mobileMenuRef.current) {
               const menuItems = mobileMenuRef.current.querySelectorAll('.category-menu-item')
               if (menuItems[newIndex]) {
@@ -169,7 +161,6 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
             {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
           </div>
         </div>
-        {/* 🆕 移动端分类菜单 - 添加 ref 和滚动容器 */}
         <div 
           ref={mobileMenuRef}
           className="overflow-x-auto flex items-center h-12 border-t scrollbar-none"
@@ -177,12 +168,11 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
         >
           <div className="flex px-4 min-w-full">
             <div className="flex space-x-2 mx-auto">
-              {categories.map((category, index) => (
+              {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleNavClick(category.id)}
                   className={cn(
-                    // 🆕 添加 category-menu-item 类名，用于滚动定位
                     "category-menu-item whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
                     activeCategory === category.id
                       ? theme === 'simple-dark' 
@@ -211,7 +201,6 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
 
-        {/* 桌面端搜索框 */}
         <div className="mb-4 px-1">
           <Search />
         </div>
