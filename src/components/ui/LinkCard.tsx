@@ -6,6 +6,7 @@ import { IconExternalLink } from '@tabler/icons-react';
 import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 import {
   FALLBACK_ICON_SRC,
   ICON_LOAD_TIMEOUT_MS,
@@ -20,11 +21,32 @@ interface LinkCardProps {
   className?: string;
 }
 
-// 提示框组件 - 保持不变，可以考虑提取但此处暂保留
+// 🆕 十五种 iOS 快捷指令颜色映射表
+const COLOR_MAP: Record<string, { bg: string; text: 'white' | 'black' }> = {
+  '红色': { bg: '#FF3B30', text: 'white' },
+  '橙色': { bg: '#FF9500', text: 'white' },
+  '黄色': { bg: '#FFCC00', text: 'black' },
+  '绿色': { bg: '#34C759', text: 'white' },
+  '薄荷绿': { bg: '#00C7BE', text: 'white' },
+  '青色': { bg: '#30B0C0', text: 'white' },
+  '蓝色': { bg: '#007AFF', text: 'white' },
+  '靛蓝': { bg: '#5856D6', text: 'white' },
+  '紫色': { bg: '#AF52DE', text: 'white' },
+  '粉色': { bg: '#FF2D55', text: 'white' },
+  '棕色': { bg: '#A2845E', text: 'white' },
+  '灰色': { bg: '#8E8E93', text: 'white' },
+  '深灰': { bg: '#636366', text: 'white' },
+  '深蓝': { bg: '#0A84FF', text: 'white' },
+  '玫红': { bg: '#BF5AF2', text: 'white' },
+};
+
+// 🆕 特殊主题列表（这些主题下不应用卡片颜色）
+const SPECIAL_THEMES = ['cyberpunk', 'bauhaus', 'macintosh'];
+
+// 提示框组件 - 保持不变
 function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: number; y: number }) {
   if (!show) return null;
   
-  // 确保在客户端环境中执行
   if (typeof window === 'undefined' || typeof document === 'undefined') return null;
   
   return createPortal(
@@ -44,7 +66,7 @@ function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: n
   );
 }
 
-// 分离 Image 组件以避免整个 LinkCard 重渲染
+// 分离 Image 组件
 const OptimisedLinkIcon = memo(function OptimisedLinkIcon({ 
   src, 
   alt, 
@@ -88,7 +110,6 @@ const OptimisedLinkIcon = memo(function OptimisedLinkIcon({
     }, [src, onLoad, onError]);
 
     return (
-        // 这里刻意使用原生 img，避免 Vercel Image Optimization 免费额度消耗。
         // eslint-disable-next-line @next/next/no-img-element
         <img
             ref={imageRef}
@@ -112,8 +133,10 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
   const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
   const [iconState, setIconState] = useState(() => getInitialIconState(link));
   const iconContainerRef = useRef<HTMLDivElement>(null);
+  
+  // 🆕 获取当前主题
+  const { theme } = useTheme();
 
-    // 使用 useCallback 优化事件处理
     const handleImageError = useCallback(() => {
         setIconState(getFailedIconState());
     }, []);
@@ -140,7 +163,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     setter({ show: false, x: 0, y: 0 });
   }, []);
 
-  // 当 link 变化时更新图片源
   useEffect(() => {
     setIconState(getInitialIconState(link));
   }, [link]);
@@ -192,6 +214,26 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     return () => window.clearInterval(intervalId);
   }, [iconState.showFallback]);
 
+  // 🆕 计算卡片颜色样式
+  const getCardStyle = () => {
+    // 检查是否应用颜色：必须有 cardColor、当前主题不是特殊主题、且颜色在映射表中
+    const isSpecialTheme = SPECIAL_THEMES.some(t => theme?.includes(t));
+    const colorConfig = link.cardColor ? COLOR_MAP[link.cardColor] : null;
+    
+    // 如果不应用颜色（无颜色、特殊主题、或颜色不在映射表中）
+    if (!colorConfig || isSpecialTheme) {
+      return { bg: '', textColor: '', applyColor: false };
+    }
+
+    return {
+      bg: colorConfig.bg,
+      textColor: colorConfig.text === 'white' ? '#ffffff' : '#1a1a1a',
+      applyColor: true,
+    };
+  };
+
+  const cardStyle = getCardStyle();
+
   return (
     <>
     <motion.a
@@ -201,11 +243,18 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className={cn(
-          "group flex h-full flex-col p-4 rounded-xl border border-border/50 bg-card hover:border-primary/50 transition-all",
+          "group flex h-full flex-col p-4 rounded-xl border border-border/50 hover:border-primary/50 transition-all",
           "hover:shadow-lg hover:shadow-primary/5",
           "w-full max-w-full",
+          // 🆕 应用颜色时，覆盖背景类
+          cardStyle.applyColor ? "bg-card" : "bg-card",
           className
         )}
+        style={{
+          // 🆕 动态设置背景色和文字颜色
+          backgroundColor: cardStyle.applyColor ? cardStyle.bg : undefined,
+          color: cardStyle.applyColor ? cardStyle.textColor : undefined,
+        }}
       >
         {/* 内容容器 */}
         <div className="flex flex-col h-full gap-2">
@@ -218,6 +267,11 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
               transition={{ delay: 0.1 }}
               className="relative w-10 h-10 rounded-xl overflow-hidden transition-all shrink-0
                        bg-muted/50 p-1.5 border border-border/50"
+              style={{
+                // 🆕 应用颜色时，图标容器背景跟随
+                backgroundColor: cardStyle.applyColor ? 'rgba(255,255,255,0.2)' : undefined,
+                borderColor: cardStyle.applyColor ? 'rgba(255,255,255,0.2)' : undefined,
+              }}
             >
               <div ref={iconContainerRef} className="icon-container relative w-full h-full">
                 {iconState.showFallback && (
@@ -249,16 +303,23 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
                 onMouseEnter={(e) => handleMouseEnter(e, true)}
                 onMouseLeave={() => handleMouseLeave(true)}
               >
-                <h3 className="text-lg text-foreground
-                               group-hover:text-primary
-                               transition-colors line-clamp-1 pr-6">
+                <h3 
+                  className="text-lg line-clamp-1 pr-6 transition-colors"
+                  style={{
+                    // 🆕 应用颜色时，标题使用当前颜色，否则使用主题颜色
+                    color: cardStyle.applyColor ? cardStyle.textColor : 'var(--foreground)',
+                  }}
+                >
                   {link.name}
                 </h3>
               </div>
-              {/* 固定位置的外链图标 */}
+              {/* 外链图标 */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2">
                 <IconExternalLink 
                   className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
+                  style={{
+                    color: cardStyle.applyColor ? cardStyle.textColor : undefined,
+                  }}
                 />
               </div>
             </div>
@@ -271,31 +332,53 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
               onMouseEnter={(e) => handleMouseEnter(e, false)}
               onMouseLeave={() => handleMouseLeave(false)}
             >
-              <p className="text-sm text-foreground/80
-                         group-hover:text-foreground
-                         line-clamp-2 transition-colors">
+              <p 
+                className="text-sm line-clamp-2 transition-colors"
+                style={{
+                  // 🆕 应用颜色时，描述使用当前颜色（带透明度），否则使用主题颜色
+                  color: cardStyle.applyColor 
+                    ? `${cardStyle.textColor}cc` 
+                    : 'var(--foreground)',
+                  opacity: cardStyle.applyColor ? 0.85 : undefined,
+                }}
+              >
                 {link.desc}
               </p>
             </div>
           )}
 
-          {/* 标签行 - 放在底部 */}
+          {/* 标签行 */}
           {link.tags && link.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
               {link.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
                   className={cn(
-                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90 transition-colors',
-                    tag.includes('力荐') && 'link-tag-featured'
+                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
+                    cardStyle.applyColor 
+                      ? 'bg-white/20 text-white/90 hover:bg-white/30'
+                      : 'bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90',
+                    tag.includes('力荐') && !cardStyle.applyColor && 'link-tag-featured'
                   )}
+                  style={{
+                    color: cardStyle.applyColor ? cardStyle.textColor : undefined,
+                  }}
                   title={tag}
                 >
                   <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
                 </span>
               ))}
               {link.tags.length > 3 && (
-                <span className="link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90 transition-colors shrink-0"
+                <span 
+                  className={cn(
+                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md shrink-0 transition-colors',
+                    cardStyle.applyColor
+                      ? 'bg-white/20 text-white/90'
+                      : 'bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90'
+                  )}
+                  style={{
+                    color: cardStyle.applyColor ? cardStyle.textColor : undefined,
+                  }}
                 >
                   +{link.tags.length - 3}
                 </span>
@@ -304,10 +387,16 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
           )}
         </div>
 
-        {/* 渐变悬浮效果 */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-transparent via-transparent to-transparent
+        {/* 渐变悬浮效果 - 应用颜色时调整透明度 */}
+        <div 
+          className="absolute inset-0 -z-10 bg-gradient-to-br from-transparent via-transparent to-transparent
                       group-hover:from-primary/5 group-hover:via-primary/2 group-hover:to-transparent
-                      transition-colors duration-500" />
+                      transition-colors duration-500"
+          style={{
+            // 🆕 应用颜色时，悬浮效果使用白色叠加
+            '--hover-color': cardStyle.applyColor ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)',
+          } as React.CSSProperties}
+        />
       </motion.a>
 
       {/* 提示框 */}
@@ -328,8 +417,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     </>
   );
 }, (prev, next) => {
-    // Custom comparison function for React.memo
-    // Only re-render if key props change
     return (
         prev.link.id === next.link.id &&
         prev.link.name === next.link.name &&
@@ -337,6 +424,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         prev.link.url === next.link.url &&
         prev.link.iconfile === next.link.iconfile &&
         prev.link.iconlink === next.link.iconlink &&
+        prev.link.cardColor === next.link.cardColor &&
         prev.className === next.className
     );
 });

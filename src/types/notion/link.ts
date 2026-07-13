@@ -29,6 +29,8 @@ export interface NotionLinkProperties {
     iconfile: FilesPropertyItemObjectResponse;
     iconlink: UrlPropertyItemObjectResponse;
     Created: CreatedTimePropertyItemObjectResponse;
+    // 🆕 新增 color 字段（十五种预设颜色）- 可选字段，不强制要求所有数据都有
+    color?: SelectPropertyItemObjectResponse;
 }
 
 // Domain Model
@@ -43,6 +45,8 @@ export interface Link {
     iconfile: string;
     iconlink: string;
     tags: string[];
+    // 🆕 新增 cardColor 字段
+    cardColor: string;
 }
 
 // Type Guard
@@ -62,12 +66,14 @@ export function isNotionLinkPage(
         'iconfile' in props &&
         'iconlink' in props &&
         'Created' in props
+        // ✅ color 字段可选，不强制检查
     );
 }
 
 // Transformer
 export function toLink(page: PageObjectResponse & { properties: NotionLinkProperties }): Link {
     const props = page.properties;
+
     return {
         id: page.id,
         name: extractTitle(props.Name),
@@ -79,5 +85,7 @@ export function toLink(page: PageObjectResponse & { properties: NotionLinkProper
         iconfile: extractFileUrl(props.iconfile),
         iconlink: extractUrl(props.iconlink),
         tags: extractMultiSelect(props.Tags),
+        // 🆕 直接使用可选链提取 color 字段值
+        cardColor: props.color?.select?.name || '',
     };
 }

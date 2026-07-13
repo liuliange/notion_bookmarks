@@ -2,64 +2,61 @@ import {
     PageObjectResponse,
     TitlePropertyItemObjectResponse,
     RichTextPropertyItemObjectResponse,
-    FilesPropertyItemObjectResponse,
+    UrlPropertyItemObjectResponse,
     SelectPropertyItemObjectResponse,
+    FilesPropertyItemObjectResponse,
     MultiSelectPropertyItemObjectResponse,
-    UrlPropertyItemObjectResponse
+    CreatedTimePropertyItemObjectResponse
 } from "@notionhq/client/build/src/api-endpoints";
 
-export type Nullable<T> = T | null;
-export type Optional<T> = T | undefined;
-
-// Type Guard for PageObjectResponse
-export function isPageObjectResponse(response: unknown): response is PageObjectResponse {
-    return (
-        typeof response === 'object' &&
-        response !== null &&
-        'properties' in response &&
-        'object' in response &&
-        (response as { object: string }).object === 'page'
-    );
+export function isPageObjectResponse(page: unknown): page is PageObjectResponse {
+    return (page as PageObjectResponse).object === 'page';
 }
 
-// Property Extractors
-export function extractTitle(property: TitlePropertyItemObjectResponse | unknown): string {
-    const p = property as TitlePropertyItemObjectResponse;
-    if (!p?.title || !Array.isArray(p.title)) return '';
-    return p.title[0]?.plain_text ?? '';
-}
-
-export function extractRichText(property: RichTextPropertyItemObjectResponse | unknown): string {
-    const p = property as RichTextPropertyItemObjectResponse;
-    if (!p?.rich_text || !Array.isArray(p.rich_text)) return '';
-    return p.rich_text[0]?.plain_text ?? '';
-}
-
-export function extractFileUrl(property: FilesPropertyItemObjectResponse | unknown): string {
-    const p = property as FilesPropertyItemObjectResponse;
-    if (!p?.files || !Array.isArray(p.files) || !p.files[0]) return '';
-    const file = p.files[0];
-
-    if (file.type === 'external' && file.external) {
-        return file.external.url;
-    }
-    if (file.type === 'file' && file.file) {
-        return file.file.url;
+export function extractTitle(prop: TitlePropertyItemObjectResponse): string {
+    if (prop.type === 'title' && prop.title && Array.isArray(prop.title) && prop.title.length > 0) {
+        return prop.title.map((t) => t.plain_text).join('');
     }
     return '';
 }
 
-export function extractSelect(property: SelectPropertyItemObjectResponse | unknown): string {
-    const p = property as SelectPropertyItemObjectResponse;
-    return p?.select?.name ?? '';
+export function extractRichText(prop: RichTextPropertyItemObjectResponse): string {
+    if (prop.type === 'rich_text' && prop.rich_text && Array.isArray(prop.rich_text) && prop.rich_text.length > 0) {
+        return prop.rich_text.map((t) => t.plain_text).join('');
+    }
+    return '';
 }
 
-export function extractMultiSelect(property: MultiSelectPropertyItemObjectResponse | unknown): string[] {
-    const p = property as MultiSelectPropertyItemObjectResponse;
-    return p?.multi_select?.map(item => item.name) ?? [];
+export function extractUrl(prop: UrlPropertyItemObjectResponse): string {
+    if (prop.type === 'url' && prop.url) {
+        return prop.url;
+    }
+    return '';
 }
 
-export function extractUrl(property: UrlPropertyItemObjectResponse | unknown): string {
-    const p = property as UrlPropertyItemObjectResponse;
-    return p?.url ?? '';
+export function extractSelect(prop: SelectPropertyItemObjectResponse | undefined): string {
+    if (!prop) return '';
+    if (prop.type === 'select' && prop.select) {
+        return prop.select.name || '';
+    }
+    return '';
+}
+
+export function extractFileUrl(prop: FilesPropertyItemObjectResponse): string {
+    if (prop.type === 'files' && prop.files && Array.isArray(prop.files) && prop.files.length > 0) {
+        const file = prop.files[0];
+        if (file.type === 'file') {
+            return file.file.url;
+        } else if (file.type === 'external') {
+            return file.external.url;
+        }
+    }
+    return '';
+}
+
+export function extractMultiSelect(prop: MultiSelectPropertyItemObjectResponse): string[] {
+    if (prop.type === 'multi_select' && prop.multi_select && Array.isArray(prop.multi_select)) {
+        return prop.multi_select.map((item) => item.name);
+    }
+    return [];
 }
