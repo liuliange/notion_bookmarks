@@ -5,8 +5,7 @@ import {
     UrlPropertyItemObjectResponse,
     SelectPropertyItemObjectResponse,
     FilesPropertyItemObjectResponse,
-    MultiSelectPropertyItemObjectResponse,
-    CreatedTimePropertyItemObjectResponse
+    MultiSelectPropertyItemObjectResponse
 } from "@notionhq/client/build/src/api-endpoints";
 
 export function isPageObjectResponse(page: unknown): page is PageObjectResponse {
