@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
 @import './bauhaus/style.css';
 @import './macintosh-1984/style.css';
+@import './cyberpunk/style.css';
 
 /* 基础变量 */
 :root {
@@ -373,6 +374,29 @@ body {
 [data-theme="cyberpunk-dark"] .group > * {
   position: relative;
   z-index: 2;
+}
+
+/* 赛博朋克主题：应用颜色的卡片（LinkCard 已移除 group 类，避免渐变边框伪元素） */
+[data-theme="cyberpunk-dark"] [data-has-color="true"] {
+  position: relative;
+  background-image: none !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"] h3,
+[data-theme="cyberpunk-dark"] [data-has-color="true"] p {
+  color: inherit !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"] .icon-container {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"]:hover .link-external-icon {
+  opacity: 1;
 }
 
 [data-theme="cyberpunk-dark"] .neon-title {

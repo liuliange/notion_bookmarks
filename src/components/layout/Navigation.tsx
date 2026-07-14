@@ -57,18 +57,15 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
     })
   }, [])
 
-  const handleNavClick = useCallback((categoryId: string, subCategoryId?: string) => {
-    setActiveCategory(categoryId)
-    
+  // 滚动定位到指定分类元素
+  const scrollToElement = useCallback((elementId: string) => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return
-    
-    const elementId = subCategoryId ? `${categoryId}-${subCategoryId}` : categoryId
+
     const element = document.getElementById(elementId)
-    
     if (element) {
       const rect = element.getBoundingClientRect()
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      
+
       window.scrollTo({
         top: rect.top + scrollTop - 100,
         behavior: 'smooth'
@@ -76,13 +73,29 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
     }
   }, [])
 
+  // 🆕 桌面端点击一级分类：展开子分类并滚动定位到该分类位置
+  const handleCategoryToggle = useCallback((categoryId: string) => {
+    toggleCategory(categoryId)
+    setActiveCategory(categoryId)
+    scrollToElement(categoryId)
+  }, [toggleCategory, scrollToElement])
+
+  // 🆕 修改：当点击二级分类时，activeCategory 存储完整的二级分类 ID
+  const handleNavClick = useCallback((categoryId: string, subCategoryId?: string) => {
+    // 如果有子分类，使用完整路径作为 activeCategory
+    const targetId = subCategoryId ? `${categoryId}-${subCategoryId}` : categoryId
+    setActiveCategory(targetId)
+
+    scrollToElement(targetId)
+  }, [scrollToElement])
+
   useEffect(() => {
     if (categories.length > 0 && activeCategory === '') {
       setActiveCategory(categories[0].id)
     }
   }, [categories, activeCategory])
 
-  // 滚动联动：监听滚动，自动高亮并滚动分类菜单
+  // 滚动联动
   useEffect(() => {
     if (typeof window === 'undefined' || categories.length === 0) return
 
@@ -109,14 +122,17 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
             }
           })
 
+          // 仅在顶层分类切换时更新，避免每帧重复触发；
+          // 二级分类下，一级仍会通过渲染时的 startsWith 匹配保持高亮
           if (newIndex !== currentIndex && categories[newIndex]) {
             currentIndex = newIndex
             setActiveCategory(categories[newIndex].id)
 
+            // 移动端菜单横向滚动跟随：使激活项居中可见
             if (mobileMenuRef.current) {
               const menuItems = mobileMenuRef.current.querySelectorAll('.category-menu-item')
-              if (menuItems[newIndex]) {
-                const menuItem = menuItems[newIndex] as HTMLElement
+              const menuItem = menuItems[newIndex] as HTMLElement | undefined
+              if (menuItem) {
                 const menuRect = mobileMenuRef.current.getBoundingClientRect()
                 const scrollLeft = menuItem.offsetLeft - menuRect.width / 2 + menuItem.offsetWidth / 2
                 mobileMenuRef.current.scrollTo({
@@ -140,14 +156,12 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
     }
   }, [categories])
 
-  // 如果未挂载，返回空占位，避免 hydration 错误
   if (!mounted) {
     return null
   }
 
   return (
     <>
-      {/* 移动端顶部导航 */}
       <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2 flex-shrink-0">
@@ -173,11 +187,9 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
                   key={category.id}
                   onClick={() => handleNavClick(category.id)}
                   className={cn(
-                    "category-menu-item whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
-                    activeCategory === category.id
-                      ? theme === 'simple-dark' 
-                        ? "bg-primary text-primary-foreground font-medium"
-                        : "bg-primary text-white font-medium"
+                    "mobile-nav-category-button category-menu-item whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
+                    activeCategory === category.id || activeCategory.startsWith(`${category.id}-`)
+                      ? "mobile-nav-category-active bg-primary text-primary-foreground font-medium"
                       : theme === 'simple-dark'
                         ? "bg-transparent text-muted-foreground hover:text-foreground hover:bg-accent"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -211,46 +223,59 @@ const Navigation = memo(function Navigation({ categories, config = defaultConfig
               ? (Icons[category.iconName as keyof typeof Icons] as React.ComponentType)
               : Icons.Globe
 
+            // 🆕 判断分类是否激活（包括其子分类）
+            const isActive = activeCategory === category.id || activeCategory.startsWith(`${category.id}-`)
+
             return (
               <li key={category.id}>
                 <div className="flex flex-col">
                   <button
-                    onClick={() => toggleCategory(category.id)}
+                    onClick={() => handleCategoryToggle(category.id)}
                     className={cn(
-                      "w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors",
-                      expandedCategories.has(category.id)
-                        ? "bg-accent"
+                      "nav-category-button w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors",
+                      isActive
+                        ? "nav-category-active bg-primary text-primary-foreground"
+                        : expandedCategories.has(category.id)
+                        ? "nav-category-expanded bg-accent"
                         : "hover:bg-accent/50"
                     )}
                   >
                     <div className="flex items-center space-x-2">
-                      <IconComponent className="w-4 h-4" />
-                      <span>{category.name}</span>
+                      <IconComponent className={cn(
+                        "w-4 h-4",
+                        isActive ? "text-primary-foreground" : "text-muted-foreground"
+                      )} />
+                      <span className={isActive ? "text-primary-foreground" : ""}>{category.name}</span>
                     </div>
                     <Icons.ChevronDown
                       className={cn(
                         "w-4 h-4 transition-transform",
-                        expandedCategories.has(category.id) ? "rotate-180" : ""
+                        expandedCategories.has(category.id) ? "rotate-180" : "",
+                        isActive ? "text-primary-foreground" : "text-muted-foreground"
                       )}
                     />
                   </button>
                   {expandedCategories.has(category.id) && (
                     <ul className="mt-1 ml-4 space-y-1">
-                      {category.subCategories.map((subCategory) => (
-                        <li key={subCategory.id}>
-                          <button
-                            onClick={() => handleNavClick(category.id, subCategory.id)}
-                            className={cn(
-                              "w-full text-left px-4 py-2 rounded-lg transition-colors text-sm",
-                              activeCategory === `${category.id}-${subCategory.id}`
-                                ? "bg-primary text-white font-medium"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                            )}
-                          >
-                            {subCategory.name}
-                          </button>
-                        </li>
-                      ))}
+                      {category.subCategories.map((subCategory) => {
+                        // 🆕 判断二级分类是否激活（精确匹配完整 ID）
+                        const isSubActive = activeCategory === `${category.id}-${subCategory.id}`
+                        return (
+                          <li key={subCategory.id}>
+                            <button
+                              onClick={() => handleNavClick(category.id, subCategory.id)}
+                              className={cn(
+                                "nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm",
+                                isSubActive
+                                  ? "nav-subcategory-active bg-primary text-primary-foreground font-medium"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                              )}
+                            >
+                              {subCategory.name}
+                            </button>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                 </div>

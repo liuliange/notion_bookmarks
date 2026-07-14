@@ -89,10 +89,84 @@
 
 /* 导航样式 */
 [data-theme="cyberpunk-dark"] nav {
-  background: linear-gradient(to bottom, hsla(232, 40%, 8%, 0.8), hsla(232, 40%, 4%, 0.9));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(to bottom, hsl(232, 40%, 8%), hsl(232, 40%, 4%));
   border-color: hsl(286, 100%, 65%);
+}
+
+/* ===== 导航菜单：恢复原版深色风格（无青色） ===== */
+[data-theme="cyberpunk-dark"] .nav-category-button,
+[data-theme="cyberpunk-dark"] .nav-subcategory-button,
+[data-theme="cyberpunk-dark"] .mobile-nav-category-button {
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  text-shadow: none;
+  letter-spacing: 0;
+  transform: none;
+  box-shadow: none;
+  border-radius: 0.5rem;
+}
+
+[data-theme="cyberpunk-dark"] .mobile-nav-category-button {
+  border-radius: 9999px;
+}
+
+/* 悬停/展开：无背景块，仅文字变亮 */
+[data-theme="cyberpunk-dark"] .nav-category-button:hover,
+[data-theme="cyberpunk-dark"] .nav-subcategory-button:hover,
+[data-theme="cyberpunk-dark"] .mobile-nav-category-button:hover,
+[data-theme="cyberpunk-dark"] .nav-category-button.nav-category-expanded {
+  background: transparent;
+  color: var(--foreground);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+/* 激活状态：霓虹紫色背景 + 白色文字（无文字发光） */
+[data-theme="cyberpunk-dark"] .nav-category-button.nav-category-active,
+[data-theme="cyberpunk-dark"] .nav-subcategory-button.nav-subcategory-active,
+[data-theme="cyberpunk-dark"] .mobile-nav-category-button.mobile-nav-category-active {
+  background: hsl(286, 100%, 65%);
+  color: #fff;
+  text-shadow: none;
+  box-shadow: 0 0 20px hsla(286, 100%, 65%, 0.5);
+}
+
+/* 主题切换按钮：透明背景，仅显示图标 */
+[data-theme="cyberpunk-dark"] .theme-switcher-trigger {
+  background: transparent !important;
+  border: none !important;
+  color: var(--muted-foreground) !important;
+  text-shadow: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+[data-theme="cyberpunk-dark"] .theme-switcher-trigger:hover {
+  background: transparent !important;
+  color: var(--foreground) !important;
+  box-shadow: none !important;
+}
+
+/* 主题切换下拉选项：透明背景，默认颜色，仅当前激活的主题名称为紫色 */
+[data-theme="cyberpunk-dark"] .theme-switcher-option {
+  background: transparent !important;
+  border: none !important;
+  color: var(--muted-foreground) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="cyberpunk-dark"] .theme-switcher-option:hover {
+  background: hsla(286, 100%, 65%, 0.15) !important;
+  color: var(--foreground) !important;
+}
+
+/* 当前激活的主题名称（赛博朋克）显示为紫色 */
+[data-theme="cyberpunk-dark"] .theme-switcher-option.theme-switcher-option-active {
+  background: hsla(286, 100%, 65%, 0.15) !important;
+  color: hsl(286, 100%, 65%) !important;
 }
 
 /* 滚动条样式 */
@@ -229,4 +303,38 @@
 
 [data-theme="cyberpunk-dark"] .hot-news-icon {
   color: hsl(180, 100%, 55%);
+}
+
+/* ===== 赛博朋克主题卡片颜色支持 ===== */
+[data-theme="cyberpunk-dark"] [data-has-color="true"] {
+  position: relative;
+  background-image: none !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"]::before,
+[data-theme="cyberpunk-dark"] [data-has-color="true"]::after {
+  display: none !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"] > * {
+  position: static !important;
+  z-index: auto !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"] h3,
+[data-theme="cyberpunk-dark"] [data-has-color="true"] p {
+  color: inherit !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"] .icon-container {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="cyberpunk-dark"] [data-has-color="true"]:hover .link-external-icon {
+  opacity: 1;
 }

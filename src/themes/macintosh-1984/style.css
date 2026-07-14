@@ -217,8 +217,15 @@
 }
 
 [data-theme="macintosh-1984"] nav button.nav-category-button.nav-category-active span,
-[data-theme="macintosh-1984"] nav button.nav-category-button.nav-category-active svg,
-[data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active,
+[data-theme="macintosh-1984"] nav button.nav-category-button.nav-category-active svg {
+  color: var(--mac-paper) !important;
+}
+
+[data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active {
+  color: var(--mac-paper) !important;
+  background: var(--mac-highlight) !important;
+}
+
 [data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active span,
 [data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active svg {
   color: var(--mac-paper) !important;

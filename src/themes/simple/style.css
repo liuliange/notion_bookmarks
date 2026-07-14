@@ -67,9 +67,22 @@
 /* Removed: [data-theme^="simple"] nav span, [data-theme^="simple"] nav button { color: var(--foreground); } */
 
 /* 导航按钮激活状态 */
-[data-theme="simple-dark"] nav button.bg-primary {
+[data-theme="simple-dark"] nav button.bg-primary,
+[data-theme="simple-dark"] nav button.nav-category-active {
   background-color: var(--primary);
-  color: var(--primary-foreground) !important; /* Ensure dark text color for simple-dark active button */
+  color: var(--primary-foreground) !important;
+}
+
+/* simple-dark 二级分类激活：使用白色文字确保在深色背景下可见 */
+[data-theme="simple-dark"] nav button.nav-subcategory-active {
+  background-color: hsl(217.2 32.6% 25%);
+  color: hsl(210 40% 98%) !important;
+}
+
+[data-theme="simple-light"] nav button.nav-category-active,
+[data-theme="simple-light"] nav button.nav-subcategory-active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 /* 导航按钮悬浮效果 */
@@ -81,6 +94,12 @@
 [data-theme="simple-dark"] nav span,
 [data-theme="simple-dark"] nav button {
   color: hsl(210 40% 98%) !important; /* Use a clear white */
+}
+
+/* ===== 深色主题移动端激活样式 ===== */
+[data-theme="simple-dark"] .mobile-nav-category-active {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
 }
 
 /* 组件样式 */
@@ -155,9 +174,9 @@
 
 /* 如果需要覆盖某些默认样式，可以在这里添加 */
 .widget-card {
-  @apply rounded-xl;
+  border-radius: 0.75rem;
 }
 
 .platform-tab {
-  @apply rounded-full;
+  border-radius: 9999px;
 }
