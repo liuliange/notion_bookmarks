@@ -41,20 +41,23 @@ const COLOR_MAP: Record<string, { bg: string; text: 'white' | 'black' }> = {
 };
 
 // 🆕 特殊主题列表（这些主题下不应用卡片颜色）
-// 目前所有主题都已支持卡片颜色，暂时保留空数组以便后续扩展
 const SPECIAL_THEMES: string[] = [];
 
-// 提示框组件 - 保持不变
+// 提示框组件 - 根据主题动态调整边框颜色
 function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: number; y: number }) {
+  const { theme } = useTheme();
+  const isDarkTheme = theme === 'simple-dark';
+  
   if (!show) return null;
   
   if (typeof window === 'undefined' || typeof document === 'undefined') return null;
   
   return createPortal(
     <div 
-      className="fixed p-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85
-                border shadow-lg max-w-xs z-[100] pointer-events-none
-                animate-in fade-in zoom-in-95 duration-200"
+      className={`fixed p-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85
+                shadow-lg max-w-xs z-[100] pointer-events-none
+                animate-in fade-in zoom-in-95 duration-200
+                ${isDarkTheme ? 'border border-white/20' : 'border'}`}
       style={{ 
         left: x,
         top: y - 8,
@@ -224,12 +227,10 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
 
   // 🆕 计算卡片颜色数据
   const getCardColorData = useCallback(() => {
-    // 检查是否应用颜色：必须有 cardColor、当前主题不是特殊主题、且颜色在映射表中
     const themeName = theme || '';
     const isSpecialTheme = SPECIAL_THEMES.some(t => themeName.includes(t));
     const colorConfig = link.cardColor ? COLOR_MAP[link.cardColor] : null;
     
-    // 如果不应用颜色（无颜色、特殊主题、或颜色不在映射表中）
     if (!colorConfig || isSpecialTheme) {
       return { bg: '', textColor: '', applyColor: false };
     }
@@ -241,17 +242,14 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     };
   }, [theme, link.cardColor]);
 
-  // 🆕 只在客户端挂载后应用颜色，避免 Hydration 错误
   const cardStyle = mounted ? getCardColorData() : { bg: '', textColor: '', applyColor: false };
 
-  // 🆕 计算最终内联样式（避免混用 background 和 backgroundColor）
   const cardInlineStyle = useCallback((): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
       backgroundColor: cardStyle.applyColor ? cardStyle.bg : undefined,
       color: cardStyle.applyColor ? cardStyle.textColor : undefined,
     };
 
-    // 赛博朋克主题特殊处理
     if (theme?.includes('cyberpunk') && cardStyle.applyColor) {
       return {
         ...baseStyle,
@@ -265,9 +263,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
   }, [theme, cardStyle.applyColor, cardStyle.bg, cardStyle.textColor]);
 
   const isCyberpunkColored = theme?.includes('cyberpunk') && cardStyle.applyColor;
-  // 麦金塔主题下标签白底白字不可见，标签统一使用主题默认样式（不随卡片颜色变化）
   const isMacintosh = theme?.includes('macintosh');
-  // 标签是否套用卡片颜色样式：麦金塔主题始终不套用
   const tagUseCardColor = cardStyle.applyColor && !isMacintosh;
 
   return (
@@ -280,7 +276,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className={cn(
-          // 赛博朋克应用颜色时移除 group，避免触发其渐变边框伪元素
           isCyberpunkColored ? "has-card-color" : "group",
           "relative flex h-full flex-col p-4 rounded-xl border border-border/50 hover:border-primary/50 transition-all",
           "hover:shadow-lg hover:shadow-primary/5",
@@ -293,9 +288,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
       >
         {/* 内容容器 */}
         <div className="flex flex-col h-full gap-2">
-          {/* 图标和名称行 */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            {/* 图标容器 */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -321,7 +314,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
                     onLoad={handleImageLoad}
                     onError={handleImageError}
                 />
-                 
                 {iconState.showSpinner && (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
                     <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -330,26 +322,24 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
               </div>
             </motion.div>
             
-            {/* 网站名称和图标 */}
             <div className="flex-1 min-w-0 relative">
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={(e) => handleMouseEnter(e, true)}
                 onMouseLeave={() => handleMouseLeave(true)}
               >
-                <h3 
-                  className="text-lg line-clamp-1 pr-6 transition-colors"
-                  style={{
-                    color: cardStyle.applyColor ? cardStyle.textColor : 'var(--foreground)',
-                  }}
+                <h3
+                  className={cn(
+                    "text-lg line-clamp-1 pr-6 transition-colors",
+                    tagUseCardColor ? "opacity-80" : "group-hover:text-primary"
+                  )}
                 >
                   {link.name}
                 </h3>
               </div>
-              {/* 外链图标 */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                <IconExternalLink 
-                  className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity link-external-icon" 
+                <IconExternalLink
+                  className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity link-external-icon"
                   style={{
                     color: cardStyle.applyColor ? cardStyle.textColor : undefined,
                   }}
@@ -358,7 +348,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
             </div>
           </div>
 
-          {/* 描述行 */}
           {link.desc && (
             <div 
               className="relative flex-1 min-h-0"
@@ -379,7 +368,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
             </div>
           )}
 
-          {/* 标签行 */}
           {link.tags && link.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
               {link.tags.slice(0, 3).map((tag) => (
@@ -419,7 +407,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
           )}
         </div>
 
-        {/* 渐变悬浮效果 */}
         <div 
           className="absolute inset-0 -z-10 bg-gradient-to-br from-transparent via-transparent to-transparent
                       group-hover:from-primary/5 group-hover:via-primary/2 group-hover:to-transparent
@@ -430,7 +417,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         />
       </motion.a>
 
-      {/* 提示框 */}
       <Tooltip 
         content={link.name}
         show={titleTooltip.show}

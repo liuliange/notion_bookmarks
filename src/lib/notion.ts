@@ -135,6 +135,8 @@ export const getWebsiteConfig = cache(async () => {
             GA_ID: configMap.GA_ID ?? '',
             // 新增widgets配置
             WIDGET_CONFIG: configMap.WIDGET_CONFIG ?? '',
+            // 推广广告位角标配置
+            WIDGET_BADGE_CONFIG: configMap.WIDGET_BADGE_CONFIG ?? '',
         };
 
         return config;

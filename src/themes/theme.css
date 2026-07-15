@@ -226,7 +226,7 @@ body {
   border: none;
   border-radius: 0;
   background: linear-gradient(135deg, var(--muted) 0%, var(--background) 100%);
-  box-shadow: 0 0 24px 2px hsla(286, 100%, 65%, 0.25), 0 0 8px 2px hsla(180, 100%, 55%, 0.15);
+  box-shadow: none;
   color: #fff;
   font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
   overflow: hidden;
@@ -254,7 +254,6 @@ body {
 
 [data-theme="cyberpunk-dark"] .platform-tab-active {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
-  text-shadow: 0 0 10px currentColor;
 }
 
 [data-theme="cyberpunk-dark"] .group {
@@ -262,7 +261,7 @@ body {
   border: none;
   border-radius: 0;
   background: linear-gradient(135deg, var(--muted) 0%, var(--background) 100%);
-  box-shadow: 0 0 24px 2px hsla(286, 100%, 65%, 0.18), 0 0 8px 2px hsla(180, 100%, 55%, 0.10);
+  box-shadow: none;
   color: #fff;
   overflow: hidden;
 }
@@ -348,8 +347,8 @@ body {
   pointer-events: none;
   background: radial-gradient(ellipse at 60% 40%, hsla(286,100%,65%,0.18) 0%, transparent 70%),
               radial-gradient(ellipse at 30% 80%, hsla(180,100%,55%,0.12) 0%, transparent 80%);
-  filter: blur(12px);
-  opacity: 0.7;
+  filter: blur(6px);
+  opacity: 0.5;
 }
 
 [data-theme="cyberpunk-dark"] .hot-news-item > * {
@@ -366,8 +365,8 @@ body {
   pointer-events: none;
   background: radial-gradient(ellipse at 60% 40%, hsla(286,100%,65%,0.18) 0%, transparent 70%),
               radial-gradient(ellipse at 30% 80%, hsla(180,100%,55%,0.12) 0%, transparent 80%);
-  filter: blur(12px);
-  opacity: 0.7;
+  filter: blur(6px);
+  opacity: 0.5;
 }
 
 [data-theme="cyberpunk-dark"] .widget-card > *,
@@ -401,35 +400,12 @@ body {
 
 [data-theme="cyberpunk-dark"] .neon-title {
   color: hsl(286, 100%, 65%);
-  text-shadow:
-    0 0 8px hsl(286, 100%, 65%),
-    0 0 16px hsl(286, 100%, 65%),
-    0 0 32px hsl(286, 100%, 65%),
-    0 0 48px hsl(286, 100%, 65%),
-    0 0 64px hsl(286, 100%, 65%),
-    0 0 80px hsl(180, 100%, 55%);
-  animation: neon-flicker 2.5s infinite alternate;
   font-family: 'Orbitron', 'Rajdhani', 'Noto Sans SC', sans-serif;
   letter-spacing: 0.12em;
   font-weight: 700;
   text-transform: uppercase;
   position: relative;
   z-index: 2;
-}
-
-[data-theme="cyberpunk-dark"] .neon-title::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 180%;
-  height: 180%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, hsla(286, 100%, 65%, 0.25) 0%, transparent 70%);
-  filter: blur(12px);
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.8;
 }
 
 @keyframes neon-flicker {
@@ -472,16 +448,16 @@ body {
 [data-theme="cyberpunk-dark"] body .stock-watchlist-widget .stock-watchlist-mode-active {
   background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
   color: #fff;
-  box-shadow: 0 0 10px hsla(180, 100%, 55%, 0.28);
+  box-shadow: none;
 }
 
 [data-theme="cyberpunk-dark"] body .stock-watchlist-widget .stock-watchlist-action-active {
   background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
   color: #fff;
-  box-shadow: 0 0 10px hsla(180, 100%, 55%, 0.28);
+  box-shadow: none;
 }
 
 [data-theme="cyberpunk-dark"] body .stock-watchlist-popover {
   background: linear-gradient(135deg, var(--muted) 0%, var(--background) 100%);
-  box-shadow: 0 0 18px hsla(286, 100%, 65%, 0.26), 0 0 8px hsla(180, 100%, 55%, 0.18);
+  box-shadow: none;
 }
