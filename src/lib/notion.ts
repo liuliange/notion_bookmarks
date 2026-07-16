@@ -15,7 +15,8 @@ import {
 } from '@/types';
 
 export const notion = new Client({
-    auth: envConfig.NOTION_TOKEN
+    auth: envConfig.NOTION_TOKEN,
+    timeoutMs: 10000,
 });
 
 export const revalidate = parseInt(process.env.REVALIDATE_TIME ?? '43200', 10);
@@ -68,7 +69,7 @@ export const getLinks = cache(async () => {
         return allLinks;
     } catch (error) {
         console.error('Error fetching links:', error);
-        return [];
+        throw new Error(`Failed to fetch links from Notion: ${error}`);
     }
 });
 
@@ -177,6 +178,6 @@ export const getCategories = cache(async (): Promise<Category[]> => {
         return categories.sort((a, b) => a.order - b.order);
     } catch (err) {
         console.error('获取分类失败:', err);
-        return [];
+        throw new Error(`Failed to fetch categories from Notion: ${err}`);
     }
 });

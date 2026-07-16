@@ -22,6 +22,9 @@ export async function GET() {
     return NextResponse.json({ links: promotedLinks });
   } catch (error) {
     console.error('获取推广链接失败:', error);
-    return NextResponse.json({ links: [] });
+    return NextResponse.json(
+      { error: '获取推广链接失败' },
+      { status: 500 }
+    );
   }
 }
