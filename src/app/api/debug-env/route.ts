@@ -44,6 +44,36 @@ export async function GET() {
     result.linksError = e instanceof Error ? e.message : String(e);
   }
 
+  // 直接 query 链接库（绕开 getLinks 内部的 sort/filter）
+  try {
+    const directQuery = await notion.databases.query({ database_id: process.env.NOTION_LINKS_DB_ID!, page_size: 100 });
+    result.directQueryNoSort = {
+      count: directQuery.results.length,
+      has_more: directQuery.has_more,
+      firstPagePropKeys: directQuery.results[0] ? Object.keys(directQuery.results[0].properties) : null,
+    };
+  } catch (e: unknown) {
+    result.directQueryNoSortError = e instanceof Error ? e.message : String(e);
+  }
+
+  // 直接 query 链接库（带 getLinks 同款 sort）
+  try {
+    const sortedQuery = await notion.databases.query({
+      database_id: process.env.NOTION_LINKS_DB_ID!,
+      page_size: 100,
+      sorts: [
+        { property: 'category1', direction: 'ascending' },
+        { property: 'category2', direction: 'ascending' },
+      ],
+    });
+    result.directQueryWithSort = {
+      count: sortedQuery.results.length,
+      has_more: sortedQuery.has_more,
+    };
+  } catch (e: unknown) {
+    result.directQueryWithSortError = e instanceof Error ? e.message : String(e);
+  }
+
   // 尝试拉取分类
   try {
     const categories = await getCategories();
