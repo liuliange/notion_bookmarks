@@ -64,9 +64,9 @@ export function isNotionLinkPage(
         'category2' in props &&
         'Tags' in props &&
         'iconfile' in props &&
-        'iconlink' in props &&
-        'Created' in props
+        'iconlink' in props
         // ✅ color 字段可选，不强制检查
+        // ✅ Created 改为可选，用 page.created_time 兜底
     );
 }
 
@@ -77,7 +77,7 @@ export function toLink(page: PageObjectResponse & { properties: NotionLinkProper
     return {
         id: page.id,
         name: extractTitle(props.Name),
-        created: props.Created.created_time,
+        created: props.Created?.created_time || page.created_time,
         desc: extractRichText(props.desc),
         url: extractUrl(props.URL) || '#',
         category1: extractSelect(props.category1) || '未分类',
