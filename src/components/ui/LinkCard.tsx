@@ -23,21 +23,21 @@ interface LinkCardProps {
 
 // 🆕 十五种卡片颜色
 const COLOR_MAP: Record<string, { bg: string; text: 'white' | 'black' }> = {
-  '红色': { bg: '#FF3B30', text: 'white' },
-  '橙色': { bg: '#FF9500', text: 'white' },
-  '黄色': { bg: '#FFCC00', text: 'white' },
-  '绿色': { bg: '#34C759', text: 'white' },
-  '薄荷绿': { bg: '#00C7BE', text: 'white' },
-  '青色': { bg: '#30B0C7', text: 'white' },
-  '蓝色': { bg: '#32ADE6', text: 'white' },
-  '靛蓝': { bg: '#007AFF', text: 'white' },
-  '紫色': { bg: '#5856D6', text: 'white' },
-  '粉色': { bg: '#AF52DE', text: 'white' },
-  '棕色': { bg: '#FF2D55', text: 'white' },
-  '灰色': { bg: '#A2845E', text: 'white' },
-  '深灰': { bg: '#8E8E93', text: 'white' },
-  '深蓝': { bg: '#636366', text: 'white' },
-  '玫红': { bg: '#1C1C1E', text: 'white' },
+  '红色': { bg: '#ef6064', text: 'white' },
+  '橙色': { bg: '#fb7d5e', text: 'white' },
+  '橙黄': { bg: '#f39f4a', text: 'white' },
+  '黄色': { bg: '#e5bf01', text: 'white' },
+  '绿色': { bg: '#32c050', text: 'white' },
+  '青色': { bg: '#08c4a5', text: 'white' },
+  '浅蓝': { bg: '#64c2ea', text: 'white' },
+  '蓝色': { bg: '#328eff', text: 'white' },
+  '紫色': { bg: '#4b67c3', text: 'white' },
+  '深紫': { bg: '#7f4eb4', text: 'white' },
+  '淡紫': { bg: '#af70d9', text: 'white' },
+  '粉色': { bg: '#eb7ac7', text: 'white' },
+  '灰色': { bg: '#7e8793', text: 'white' },
+  '驼色': { bg: '#b99e80', text: 'white' },
+  '米色': { bg: '#b89e80', text: 'white' },
 };
 
 // 🆕 特殊主题列表（这些主题下不应用卡片颜色）
