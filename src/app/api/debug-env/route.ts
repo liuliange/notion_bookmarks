@@ -50,7 +50,12 @@ export async function GET() {
     result.directQueryNoSort = {
       count: directQuery.results.length,
       has_more: directQuery.has_more,
-      firstPagePropKeys: directQuery.results[0] ? Object.keys(directQuery.results[0].properties) : null,
+      firstPagePropKeys:
+        directQuery.results[0] && 'properties' in directQuery.results[0]
+          ? Object.keys(
+              (directQuery.results[0] as { properties: Record<string, unknown> }).properties,
+            )
+          : null,
     };
   } catch (e: unknown) {
     result.directQueryNoSortError = e instanceof Error ? e.message : String(e);
