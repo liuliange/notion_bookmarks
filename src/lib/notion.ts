@@ -131,6 +131,7 @@ export const getWebsiteConfig = cache(async () => {
             SOCIAL_SHOPEE: configMap.SOCIAL_SHOPEE ?? '',   // ✅ 已修正
             SOCIAL_BUY: configMap.SOCIAL_BUY ?? '',
             SOCIAL_QQ: configMap.SOCIAL_QQ ?? '',
+            SOCIAL_GZH: configMap.SOCIAL_GZH ?? '',
             // 分析和统计
             CLARITY_ID: configMap.CLARITY_ID ?? '',
             GA_ID: configMap.GA_ID ?? '',

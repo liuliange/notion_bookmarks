@@ -11,7 +11,7 @@ export function Search() {
       <input
         type='text'
         placeholder='搜索优惠券'
-        className='w-full pl-3 pr-8 py-1.5 text-base rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none'
+        className='w-full pl-3 pr-8 py-1.5 text-base rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:placeholder:text-transparent focus:outline-none'
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         autoCorrect='off'

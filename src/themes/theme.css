@@ -400,12 +400,35 @@ body {
 
 [data-theme="cyberpunk-dark"] .neon-title {
   color: hsl(286, 100%, 65%);
+  text-shadow:
+    0 0 8px hsl(286, 100%, 65%),
+    0 0 16px hsl(286, 100%, 65%),
+    0 0 32px hsl(286, 100%, 65%),
+    0 0 48px hsl(286, 100%, 65%),
+    0 0 64px hsl(286, 100%, 65%),
+    0 0 80px hsl(180, 100%, 55%);
+  animation: neon-flicker 2.5s infinite alternate;
   font-family: 'Orbitron', 'Rajdhani', 'Noto Sans SC', sans-serif;
   letter-spacing: 0.12em;
   font-weight: 700;
   text-transform: uppercase;
   position: relative;
   z-index: 2;
+}
+
+[data-theme="cyberpunk-dark"] .neon-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180%;
+  height: 180%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, hsla(286, 100%, 65%, 0.25) 0%, transparent 70%);
+  filter: blur(12px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.8;
 }
 
 @keyframes neon-flicker {

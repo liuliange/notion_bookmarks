@@ -16,6 +16,7 @@ export const defaultConfig = {
     SOCIAL_QQ: '',
     SOCIAL_BUY: '',
     SOCIAL_SHOP: '',
+    SOCIAL_GZH: '',
 } as const;
 
 // 环境变量配置
