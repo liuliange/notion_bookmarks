@@ -5,15 +5,9 @@ export async function GET() {
     try {
         const allLinks = await getLinks();
 
-        const tagAdLinks = allLinks.filter(link => {
-            if (Array.isArray(link.tags)) {
-                return link.tags.includes('标签广告');
-            }
-            if (typeof link.tags === 'string') {
-                return link.tags.includes('标签广告');
-            }
-            return false;
-        });
+        const tagAdLinks = allLinks.filter(
+            link => Array.isArray(link.tags) && link.tags.includes('标签广告')
+        );
 
         return NextResponse.json({
             success: true,
