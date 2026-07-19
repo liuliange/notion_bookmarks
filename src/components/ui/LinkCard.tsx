@@ -15,6 +15,7 @@ import {
   getLoadedIconState,
   getTimedOutIconState,
 } from '@/lib/link-icon';
+import { HIDDEN_TAGS } from '@/lib/tags';
 
 interface LinkCardProps {
   link: Link;
@@ -368,43 +369,47 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
             </div>
           )}
 
-          {link.tags && link.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
-              {link.tags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className={cn(
-                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
-                    tagUseCardColor
-                      ? 'bg-white/20 hover:bg-white/30'
-                      : 'bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90',
-                    tag.includes('力荐') && !tagUseCardColor && 'link-tag-featured'
-                  )}
-                  style={{
-                    color: tagUseCardColor ? cardStyle.textColor : undefined,
-                  }}
-                  title={tag}
-                >
-                  <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
-                </span>
-              ))}
-              {link.tags.length > 3 && (
-                <span 
-                  className={cn(
-                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md shrink-0 transition-colors',
-                    tagUseCardColor
-                      ? 'bg-white/20'
-                      : 'bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90'
-                  )}
-                  style={{
-                    color: tagUseCardColor ? cardStyle.textColor : undefined,
-                  }}
-                >
-                  +{link.tags.length - 3}
-                </span>
-              )}
-            </div>
-          )}
+          {(() => {
+            const visibleTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
+            if (visibleTags.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
+                {visibleTags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className={cn(
+                      'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
+                      tagUseCardColor
+                        ? 'bg-white/20 hover:bg-white/30'
+                        : 'bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90',
+                      tag.includes('力荐') && !tagUseCardColor && 'link-tag-featured'
+                    )}
+                    style={{
+                      color: tagUseCardColor ? cardStyle.textColor : undefined,
+                    }}
+                    title={tag}
+                  >
+                    <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
+                  </span>
+                ))}
+                {visibleTags.length > 3 && (
+                  <span 
+                    className={cn(
+                      'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md shrink-0 transition-colors',
+                      tagUseCardColor
+                        ? 'bg-white/20'
+                        : 'bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90'
+                    )}
+                    style={{
+                      color: tagUseCardColor ? cardStyle.textColor : undefined,
+                    }}
+                  >
+                    +{visibleTags.length - 3}
+                  </span>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         <div 

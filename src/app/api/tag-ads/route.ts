@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getLinks } from '@/lib/notion';
+import { TAG_AD_TAG } from '@/lib/tags';
 
 export async function GET() {
     try {
         const allLinks = await getLinks();
 
         const tagAdLinks = allLinks.filter(
-            link => Array.isArray(link.tags) && link.tags.includes('标签广告')
+            link => Array.isArray(link.tags) && link.tags.includes(TAG_AD_TAG)
         );
 
         return NextResponse.json({

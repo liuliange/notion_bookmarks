@@ -14,9 +14,10 @@ import {
     extractRichText,
     extractUrl,
     extractSelect,
-    extractFileUrl,
+    extractFileInfo,
     extractMultiSelect
 } from "./common";
+import { downloadIcon } from '@/lib/icon-sync';
 
 // Precise Definition of Notion Properties for Links Database
 export interface NotionLinkProperties {
@@ -71,8 +72,17 @@ export function isNotionLinkPage(
 }
 
 // Transformer
-export function toLink(page: PageObjectResponse & { properties: NotionLinkProperties }): Link {
+export async function toLink(page: PageObjectResponse & { properties: NotionLinkProperties }): Promise<Link> {
     const props = page.properties;
+
+    // Notion 托管的文件 URL 会过期：优先下载到本地静态托管，失败则回退中转站代理
+    const file = extractFileInfo(props.iconfile);
+    let iconfile = '';
+    if (file.url && !file.isNotionHosted) {
+        iconfile = file.url;
+    } else if (file.url && file.isNotionHosted) {
+        iconfile = (await downloadIcon(page.id, file.url)) ?? `/api/icon/${page.id}`;
+    }
 
     return {
         id: page.id,
@@ -82,7 +92,7 @@ export function toLink(page: PageObjectResponse & { properties: NotionLinkProper
         url: extractUrl(props.URL) || '#',
         category1: extractSelect(props.category1) || '未分类',
         category2: extractSelect(props.category2) || '默认',
-        iconfile: extractFileUrl(props.iconfile),
+        iconfile,
         iconlink: extractUrl(props.iconlink),
         tags: extractMultiSelect(props.Tags),
         // 🆕 直接使用可选链提取 color 字段值

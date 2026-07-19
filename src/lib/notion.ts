@@ -2,6 +2,7 @@ import { Client } from "@notionhq/client";
 import { GetDatabaseResponse, DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { cache } from "react";
 import { envConfig } from '@/config';
+import { cleanupOrphanIcons } from '@/lib/icon-sync';
 import {
     Link,
     WebsiteConfig,
@@ -45,9 +46,11 @@ export const getLinks = cache(async () => {
                 ],
             });
 
-            const links = response.results
-                .filter(isNotionLinkPage)
-                .map(toLink);
+            const links = await Promise.all(
+                response.results
+                    .filter(isNotionLinkPage)
+                    .map(toLink)
+            );
 
             allLinks.push(...links);
             hasMore = response.has_more;
@@ -65,6 +68,9 @@ export const getLinks = cache(async () => {
 
             return new Date(b.created).getTime() - new Date(a.created).getTime();
         });
+
+        // 清理已无对应链接的孤儿图标文件，回收空间
+        cleanupOrphanIcons(new Set(allLinks.map((l) => l.id)));
 
         return allLinks;
     } catch (error) {

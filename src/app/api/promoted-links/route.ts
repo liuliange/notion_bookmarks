@@ -1,10 +1,7 @@
 // src/app/api/promoted-links/route.ts
 import { getLinks } from '@/lib/notion';
 import { NextResponse } from 'next/server';
-
-// 推广广告位使用的标签，过滤后需从卡片中移除
-const PROMOTED_TAG = '置顶推广';
-const MAX_PROMOTED = 5;
+import { PROMOTED_TAG, MAX_PROMOTED } from '@/lib/tags';
 
 export async function GET() {
   try {

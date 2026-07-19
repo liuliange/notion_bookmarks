@@ -46,6 +46,7 @@ export default function TagAdPill({ link, className, theme }: TagAdPillProps) {
                     alt=""
                     draggable={false}
                     className="w-4 h-4 rounded object-contain"
+                    decoding="async"
                     onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                 />
             )}
