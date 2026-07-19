@@ -4,10 +4,21 @@
 
 ## [Unreleased]
 
+### 删除
+- 移除所有小组件（简易时钟、圆形时钟、天气、IP信息、热搜、自选股）
+- 移除小组件相关 API 路由（hot-news、weather）
+- 移除小组件相关依赖（lunar-javascript、qweather-icons、node-html-parser）
+- 移除相关测试和类型定义
+
+### 优化
+- 保留置顶推广和标签广告功能，从 HomeWidgets 中独立
+- 统一五主题框架：cyberpunk 样式归位到独立 style.css
+- LinkCard 统一使用 group 类，消除主题特殊分支
+- 同步 navdeal 的 extractColor 和 cardColor 支持
+
 ### 修复
-- 修复了热搜组件的数据获取和显示问题
-- 修复了天气组件的SSR水合错误，确保服务器端和客户端渲染一致性
-- 优化了浏览器API的客户端检查，避免服务器端渲染时的兼容性问题
+- 修复 cyberpunk 颜色卡片霓虹边框缺失
+- 修复赛博朋克主题侧边栏样式异常
 
 
 ## [1.0.0] - 2024-07-25
