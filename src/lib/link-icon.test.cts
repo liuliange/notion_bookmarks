@@ -13,6 +13,7 @@ test('优先使用 Notion 上传的 iconfile', () => {
   const iconUrl = getLinkIconUrl({
     iconfile: 'https://static.example.com/icon.png',
     iconlink: 'https://example.com/favicon.ico',
+    cardColor: '',
   });
 
   assert.equal(iconUrl, 'https://static.example.com/icon.png');
@@ -22,6 +23,7 @@ test('没有 iconfile 时使用 iconlink', () => {
   const iconUrl = getLinkIconUrl({
     iconfile: '',
     iconlink: 'https://example.com/favicon.ico',
+    cardColor: '',
   });
 
   assert.equal(iconUrl, 'https://example.com/favicon.ico');
@@ -31,6 +33,7 @@ test('没有远程图标时直接使用本地图标且不显示 loading', () => 
   const state = getInitialIconState({
     iconfile: '',
     iconlink: '',
+    cardColor: '',
   });
 
   assert.deepEqual(state, {

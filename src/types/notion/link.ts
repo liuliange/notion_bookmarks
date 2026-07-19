@@ -15,7 +15,8 @@ import {
     extractUrl,
     extractSelect,
     extractFileInfo,
-    extractMultiSelect
+    extractMultiSelect,
+    extractColor
 } from "./common";
 import { downloadIcon } from '@/lib/icon-sync';
 
@@ -95,7 +96,6 @@ export async function toLink(page: PageObjectResponse & { properties: NotionLink
         iconfile,
         iconlink: extractUrl(props.iconlink),
         tags: extractMultiSelect(props.Tags),
-        // 🆕 直接使用可选链提取 color 字段值
-        cardColor: props.color?.select?.name || '',
+        cardColor: extractColor(props.color),
     };
 }

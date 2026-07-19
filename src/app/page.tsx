@@ -65,7 +65,7 @@ export default async function HomePage() {
         <Navigation categories={categoriesWithSubs} config={config} />
       </aside>
       <main className="ml-0 lg:ml-[300px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
-        {/* HomeWidgets 内部自判断：推广位按数据显隐，小组件按 WIDGET_CONFIG 显隐 */}
+        {/* 推广广告位 + 标签广告栏（数据驱动显隐） */}
         <HomeWidgets config={config} />
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
           <LinkContainer 

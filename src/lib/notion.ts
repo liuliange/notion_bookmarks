@@ -141,9 +141,9 @@ export const getWebsiteConfig = cache(async () => {
             // 分析和统计
             CLARITY_ID: configMap.CLARITY_ID ?? '',
             GA_ID: configMap.GA_ID ?? '',
-            // 新增widgets配置
+            // 小组件列表（已废弃，保留兼容）
             WIDGET_CONFIG: configMap.WIDGET_CONFIG ?? '',
-            // 推广广告位角标配置
+            // 推广广告位角标配色（如：热销,#FF6B6B,上新,#4ECDC4）
             WIDGET_BADGE_CONFIG: configMap.WIDGET_BADGE_CONFIG ?? '',
         };
 

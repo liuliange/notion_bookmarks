@@ -42,15 +42,7 @@ export function extractSelect(prop: SelectPropertyItemObjectResponse | undefined
 }
 
 export function extractFileUrl(prop: FilesPropertyItemObjectResponse): string {
-    if (prop.type === 'files' && prop.files && Array.isArray(prop.files) && prop.files.length > 0) {
-        const file = prop.files[0];
-        if (file.type === 'file') {
-            return file.file.url;
-        } else if (file.type === 'external') {
-            return file.external.url;
-        }
-    }
-    return '';
+    return extractFileInfo(prop).url;
 }
 
 /**
@@ -75,4 +67,11 @@ export function extractMultiSelect(prop: MultiSelectPropertyItemObjectResponse):
         return prop.multi_select.map((item) => item.name);
     }
     return [];
+}
+
+/**
+ * 解析 Notion select 类型的颜色属性（链接卡片配色）。
+ */
+export function extractColor(property: SelectPropertyItemObjectResponse | unknown): string {
+    return extractSelect(property);
 }

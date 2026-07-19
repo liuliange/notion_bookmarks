@@ -231,7 +231,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     const themeName = theme || '';
     const isSpecialTheme = SPECIAL_THEMES.some(t => themeName.includes(t));
     const colorConfig = link.cardColor ? COLOR_MAP[link.cardColor] : null;
-    
+
     if (!colorConfig || isSpecialTheme) {
       return { bg: '', textColor: '', applyColor: false };
     }
@@ -245,25 +245,6 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
 
   const cardStyle = mounted ? getCardColorData() : { bg: '', textColor: '', applyColor: false };
 
-  const cardInlineStyle = useCallback((): React.CSSProperties => {
-    const baseStyle: React.CSSProperties = {
-      backgroundColor: cardStyle.applyColor ? cardStyle.bg : undefined,
-      color: cardStyle.applyColor ? cardStyle.textColor : undefined,
-    };
-
-    if (theme?.includes('cyberpunk') && cardStyle.applyColor) {
-      return {
-        ...baseStyle,
-        backgroundImage: 'none',
-        border: '2px solid transparent',
-        boxSizing: 'border-box',
-      };
-    }
-
-    return baseStyle;
-  }, [theme, cardStyle.applyColor, cardStyle.bg, cardStyle.textColor]);
-
-  const isCyberpunkColored = theme?.includes('cyberpunk') && cardStyle.applyColor;
   const isMacintosh = theme?.includes('macintosh');
   const tagUseCardColor = cardStyle.applyColor && !isMacintosh;
 
@@ -277,14 +258,17 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className={cn(
-          isCyberpunkColored ? "has-card-color" : "group",
+          "group",
           "relative flex h-full flex-col p-4 rounded-xl border border-border/50 hover:border-primary/50 transition-all",
           "hover:shadow-lg hover:shadow-primary/5",
           "w-full max-w-full",
           "bg-card",
           className
         )}
-        style={cardInlineStyle()}
+        style={cardStyle.applyColor ? {
+          backgroundColor: cardStyle.bg,
+          color: cardStyle.textColor,
+        } : undefined}
         data-has-color={cardStyle.applyColor ? "true" : undefined}
       >
         {/* 内容容器 */}

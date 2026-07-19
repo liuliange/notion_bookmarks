@@ -102,23 +102,8 @@
   color: var(--primary-foreground) !important;
 }
 
-/* 组件样式 */
-[data-theme^="simple"] .widget-card {
-  background-color: var(--card);
-  color: var(--card-foreground);
-  border-radius: var(--radius);
-  border: var(--border-width) var(--border-style) var(--border);
-  box-shadow: var(--shadow-sm);
-  /* transition: all var(--transition-duration) var(--transition-timing); */
-}
-
-[data-theme^="simple"] .widget-card:hover {
-  box-shadow: var(--shadow-hover);
-  /* 移除transform，防止抖动 */
-  /* transform: translateY(-1px); */
-}
-
-[data-theme^="simple"] .platform-tab {
+/* 如果需要覆盖某些默认样式，可以在这里添加 */
+.platform-tab {
   background: transparent;
   color: var(--muted-foreground);
   transition: all var(--transition-duration) var(--transition-timing);
@@ -135,48 +120,7 @@
   font-weight: var(--font-weight-medium);
 }
 
-[data-theme^="simple"] .hot-news-item {
-  background-color: var(--card);
-  color: var(--card-foreground);
-  border-radius: var(--radius);
-  border: var(--border-width) var(--border-style) var(--border);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-duration) var(--transition-timing);
-}
-
-[data-theme^="simple"] .hot-news-item:hover {
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
-  border-left-color: var(--primary);
-  background: var(--accent);
-}
-
-[data-theme^="simple"] .hot-news-index {
-  color: var(--muted-foreground);
-}
-
-[data-theme^="simple"] .hot-news-title {
-  color: var(--card-foreground);
-  transition: color var(--transition-duration) var(--transition-timing);
-}
-
-[data-theme^="simple"] .hot-news-item:hover .hot-news-title {
-  color: var(--primary);
-}
-
-[data-theme^="simple"] .hot-news-views {
-  color: var(--muted-foreground);
-}
-
-[data-theme^="simple"] .hot-news-icon {
-  color: var(--muted-foreground);
-}
-
 /* 如果需要覆盖某些默认样式，可以在这里添加 */
-.widget-card {
-  border-radius: 0.75rem;
-}
-
 .platform-tab {
   border-radius: 9999px;
 }

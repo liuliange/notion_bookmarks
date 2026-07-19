@@ -98,18 +98,6 @@
   text-shadow: none;
 }
 
-[data-theme="macintosh-1984"] .widget-card {
-  box-sizing: border-box;
-  position: relative;
-  overflow: hidden;
-  color: var(--mac-ink);
-  background: var(--mac-panel);
-  border: var(--mac-line);
-  border-radius: 0;
-  box-shadow: var(--mac-window-shadow);
-  isolation: isolate;
-}
-
 [data-theme="macintosh-1984"] a.group {
   box-sizing: border-box;
   position: relative;
@@ -156,7 +144,6 @@
   z-index: 1;
 }
 
-[data-theme="macintosh-1984"] .widget-card:hover,
 [data-theme="macintosh-1984"] a.group:hover {
   border-color: var(--mac-ink);
   box-shadow: var(--mac-window-shadow-hover);
@@ -169,8 +156,7 @@
   line-height: 1.2;
 }
 
-[data-theme="macintosh-1984"] a.group p,
-[data-theme="macintosh-1984"] .hot-news-title {
+[data-theme="macintosh-1984"] a.group p {
   color: var(--mac-ink);
 }
 
@@ -294,78 +280,6 @@
   border: var(--mac-line);
   border-radius: 0;
   box-shadow: var(--mac-control-shadow);
-}
-
-[data-theme="macintosh-1984"] .weather-widget .weather-background-decor {
-  display: none;
-}
-
-[data-theme="macintosh-1984"] .weather-widget .weather-location-trigger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-left: 0.35rem;
-  padding: 0;
-  vertical-align: middle;
-  color: var(--mac-ink);
-  background: var(--mac-paper);
-  border: var(--mac-line);
-  border-radius: 0;
-  box-shadow: var(--mac-control-shadow);
-}
-
-[data-theme="macintosh-1984"] .weather-widget .weather-location-icon {
-  width: 0.85rem;
-  height: 0.85rem;
-  color: var(--mac-ink);
-}
-
-[data-theme="macintosh-1984"] .weather-widget .air-quality-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 1.35rem;
-  min-width: 3.4rem;
-  padding: 0 0.45rem;
-  color: var(--mac-ink);
-  background: var(--mac-paper);
-  border: var(--mac-line);
-  border-radius: 0;
-  box-shadow: var(--mac-control-shadow);
-}
-
-[data-theme="macintosh-1984"] .weather-widget .air-quality-category {
-  padding: 0;
-  color: var(--mac-ink);
-  background: transparent;
-  font-weight: 700;
-}
-
-[data-theme="macintosh-1984"] .weather-widget .air-quality-value {
-  color: var(--mac-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-[data-theme="macintosh-1984"] .hot-news-item {
-  position: relative;
-  overflow: hidden;
-  color: var(--mac-ink);
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-  border-left: var(--mac-line);
-}
-
-[data-theme="macintosh-1984"] .hot-news-item:hover {
-  color: var(--mac-paper);
-  background: var(--mac-highlight);
-}
-
-[data-theme="macintosh-1984"] .hot-news-index,
-[data-theme="macintosh-1984"] .hot-news-icon {
-  color: var(--mac-ink);
 }
 
 [data-theme="macintosh-1984"] footer {
