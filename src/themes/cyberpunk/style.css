@@ -100,8 +100,22 @@ body {
   border: none;
   border-radius: 0 !important;
   background: linear-gradient(135deg, var(--muted) 0%, var(--background) 100%);
+  box-shadow: 0 0 24px 2px hsla(286, 100%, 65%, 0.18),
+              0 0 8px 2px hsla(180, 100%, 55%, 0.10);
   color: #fff;
   overflow: hidden;
+}
+
+[data-theme="cyberpunk-dark"] .group::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 60% 40%, hsla(286, 100%, 65%, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse at 30% 80%, hsla(180, 100%, 55%, 0.12) 0%, transparent 80%);
+  filter: blur(12px);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 [data-theme="cyberpunk-dark"] .group::before {
