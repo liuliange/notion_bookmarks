@@ -33,7 +33,7 @@ export function extractUrl(prop: UrlPropertyItemObjectResponse): string {
     return '';
 }
 
-export function extractSelect(prop: SelectPropertyItemObjectResponse | undefined): string {
+export function extractSelect(prop: SelectPropertyItemObjectResponse | unknown): string {
     if (!prop) return '';
     if (prop.type === 'select' && prop.select) {
         return prop.select.name || '';
