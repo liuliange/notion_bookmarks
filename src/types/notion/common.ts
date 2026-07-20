@@ -35,8 +35,9 @@ export function extractUrl(prop: UrlPropertyItemObjectResponse): string {
 
 export function extractSelect(prop: SelectPropertyItemObjectResponse | unknown): string {
     if (!prop) return '';
-    if (prop.type === 'select' && prop.select) {
-        return prop.select.name || '';
+    const select = prop as SelectPropertyItemObjectResponse;
+    if (select.type === 'select' && select.select) {
+        return select.select.name || '';
     }
     return '';
 }
