@@ -49,11 +49,19 @@
 }
 
 /* 标签效果 */
-[data-theme^="simple"] .group .tag {
+[data-theme^="simple"] .group .tag,
+[data-theme^="simple"] .group .link-tag {
   border-radius: var(--radius-sm);
   background: var(--muted);
   font-size: var(--font-size-sm);
   color: var(--muted-foreground);
+}
+
+/* 力荐标签 */
+[data-theme^="simple"] .group .link-tag-featured {
+  background: hsl(45 100% 50% / 0.25);
+  color: hsl(40 100% 30%);
+  font-weight: 600;
 }
 
 /* 导航组件样式 */
@@ -67,22 +75,9 @@
 /* Removed: [data-theme^="simple"] nav span, [data-theme^="simple"] nav button { color: var(--foreground); } */
 
 /* 导航按钮激活状态 */
-[data-theme="simple-dark"] nav button.bg-primary,
-[data-theme="simple-dark"] nav button.nav-category-active {
+[data-theme="simple-dark"] nav button.bg-primary {
   background-color: var(--primary);
-  color: var(--primary-foreground) !important;
-}
-
-/* simple-dark 二级分类激活：使用白色文字确保在深色背景下可见 */
-[data-theme="simple-dark"] nav button.nav-subcategory-active {
-  background-color: hsl(217.2 32.6% 25%);
-  color: hsl(210 40% 98%) !important;
-}
-
-[data-theme="simple-light"] nav button.nav-category-active,
-[data-theme="simple-light"] nav button.nav-subcategory-active {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  color: var(--primary-foreground) !important; /* Ensure dark text color for simple-dark active button */
 }
 
 /* 导航按钮悬浮效果 */
@@ -94,12 +89,6 @@
 [data-theme="simple-dark"] nav span,
 [data-theme="simple-dark"] nav button {
   color: hsl(210 40% 98%) !important; /* Use a clear white */
-}
-
-/* ===== 深色主题移动端激活样式 ===== */
-[data-theme="simple-dark"] .mobile-nav-category-active {
-  background-color: var(--primary) !important;
-  color: var(--primary-foreground) !important;
 }
 
 /* 如果需要覆盖某些默认样式，可以在这里添加 */
@@ -122,5 +111,5 @@
 
 /* 如果需要覆盖某些默认样式，可以在这里添加 */
 .platform-tab {
-  border-radius: 9999px;
+  @apply rounded-full;
 }
