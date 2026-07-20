@@ -33,11 +33,10 @@ export function extractUrl(prop: UrlPropertyItemObjectResponse): string {
     return '';
 }
 
-export function extractSelect(prop: SelectPropertyItemObjectResponse | unknown): string {
+export function extractSelect(prop: SelectPropertyItemObjectResponse | undefined): string {
     if (!prop) return '';
-    const select = prop as SelectPropertyItemObjectResponse;
-    if (select.type === 'select' && select.select) {
-        return select.select.name || '';
+    if (prop.type === 'select' && prop.select) {
+        return prop.select.name || '';
     }
     return '';
 }
@@ -73,6 +72,6 @@ export function extractMultiSelect(prop: MultiSelectPropertyItemObjectResponse):
 /**
  * 解析 Notion select 类型的颜色属性（链接卡片配色）。
  */
-export function extractColor(property: SelectPropertyItemObjectResponse | unknown): string {
+export function extractColor(property: SelectPropertyItemObjectResponse | undefined): string {
     return extractSelect(property);
 }
