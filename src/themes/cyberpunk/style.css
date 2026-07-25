@@ -64,6 +64,7 @@
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.1em;
+  margin-bottom: 0;
 }
 
 /* 通用组件样式 */
@@ -256,4 +257,18 @@ body {
 
 [data-theme="cyberpunk-dark"] ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, hsl(286, 100%, 75%), hsl(180, 100%, 65%));
+}
+
+/* 一级分类标题对齐：与浅色/深色/包豪斯主题保持一致（消除图标下移、标题不对称） */
+[data-theme="cyberpunk-dark"] section.category-section > div:first-child {
+  align-items: center;
+}
+
+[data-theme="cyberpunk-dark"] section.category-section > div:first-child > h2 {
+  margin: 0;
+}
+
+/* 二级分类标题对齐：消除 h3 margin-bottom 造成的圆点下移，与一级标题保持一致 */
+[data-theme="cyberpunk-dark"] section.category-section > div > div > div > h3 {
+  margin: 0;
 }

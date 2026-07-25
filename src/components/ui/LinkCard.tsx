@@ -205,13 +205,13 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
   }, [link]);
 
   useEffect(() => {
-    if (iconState.isLoaded || iconState.src === FALLBACK_ICON_SRC) {
+    if (iconState.isLoaded || iconState.src === FALLBACK_ICON_SRC || iconState.showFallback) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       setIconState((state) => {
-        if (state.isLoaded || state.src === FALLBACK_ICON_SRC) {
+        if (state.isLoaded || state.src === FALLBACK_ICON_SRC || state.showFallback) {
           return state;
         }
 
@@ -220,7 +220,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     }, ICON_LOAD_TIMEOUT_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [iconState.isLoaded, iconState.src]);
+  }, [iconState.isLoaded, iconState.src, iconState.showFallback]);
 
   useEffect(() => {
     if (!iconState.showFallback) return;
@@ -281,7 +281,11 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
               className="relative w-10 h-10 rounded-xl overflow-hidden transition-all shrink-0
-                       bg-muted/50 p-1.5"
+                       bg-muted/50 p-1.5 border border-border/50"
+              style={{
+                backgroundColor: cardColorData.applyColor ? 'rgba(255,255,255,0.2)' : undefined,
+                borderColor: cardColorData.applyColor ? 'rgba(255,255,255,0.2)' : undefined,
+              }}
             >
               <div ref={iconContainerRef} className="icon-container relative w-full h-full">
                 {iconState.showFallback && (

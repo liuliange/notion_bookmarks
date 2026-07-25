@@ -59,11 +59,16 @@ export function getFailedIconState(): IconLoadState {
 
 export function getTimedOutIconState(state: IconLoadState): IconLoadState {
   if (state.isLoaded || state.src === FALLBACK_ICON_SRC) {
+    // 已加载或已兜底：仅当 spinner 还在转时才更新，否则返回同一引用避免冗余重渲染
+    if (!state.showSpinner) return state;
     return {
       ...state,
       showSpinner: false,
     };
   }
+
+  // 已超时（showFallback 已 true 且 spinner 已停）：状态未变，返回同一引用，React 直接跳过更新
+  if (state.showFallback && !state.showSpinner) return state;
 
   return {
     ...state,

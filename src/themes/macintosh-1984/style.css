@@ -162,11 +162,11 @@
 
 [data-theme="macintosh-1984"] a.group .icon-container,
 [data-theme="macintosh-1984"] a.group [class*="bg-muted"] {
-  color: var(--mac-ink);
-  background: var(--mac-paper);
-  border: var(--mac-line);
-  border-radius: 0;
-  box-shadow: var(--mac-inset-shadow);
+  color: var(--mac-ink) !important;
+  background: var(--mac-paper) !important;
+  border: var(--mac-line) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--mac-inset-shadow) !important;
 }
 
 [data-theme="macintosh-1984"] a.group .link-tag,

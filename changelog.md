@@ -19,6 +19,7 @@
 ### 修复
 - 修复 cyberpunk 颜色卡片霓虹边框缺失
 - 修复赛博朋克主题侧边栏样式异常
+- 修复 LinkCard 图标超时状态机在开发环境（StrictMode）下偶发 "Maximum update depth exceeded" 报错：`getTimedOutIconState` 状态无变化时返回同一引用，timeout effect 增加 `showFallback` 依赖与守卫，消除冗余 setState 级联
 
 
 ## [1.0.0] - 2024-07-25
