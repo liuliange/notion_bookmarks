@@ -270,26 +270,33 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
   }, [link.command, showToast]);
 
   const handleShare = useCallback(async () => {
-    // 移动端分享文案：标题 + 描述（链接由 navigator.share 的 url 字段单独携带）
-    const shareText = link.desc ? `${link.name} - ${link.desc}` : link.name;
+    // 复制/回退文案：标题 + 描述 + 链接（用户「只想拷贝」时的完整内容，不受系统分享面板控制）
+    const combined = link.desc
+      ? `${link.name} - ${link.desc} - ${link.url}`
+      : `${link.name} - ${link.url}`;
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      // 优先调起系统分享面板，便于分享到微信/朋友圈等
+      const shareText = link.desc ? `${link.name} - ${link.desc}` : link.name;
       try {
         await navigator.share({ title: link.name, text: shareText, url: link.url });
-        return; // 分享面板由系统控制，不显示 Toast
+        return;
       } catch {
-        // 用户取消分享，不回退复制（移动端不显示 Toast）
+        // 用户取消/分享失败 → 回退直接写入剪贴板（内容可控、跨设备一致）
+        try {
+          await navigator.clipboard.writeText(combined);
+          showToast('复制成功');
+        } catch {
+          // 复制失败静默处理：链接不可见，提示用户也无法操作
+        }
         return;
       }
     }
-    // 桌面端/不支持系统分享：复制「标题 + 描述 + 链接」组合文案
-    const combined = link.desc
-      ? `${link.name}\n${link.desc}\n${link.url}`
-      : `${link.name}\n${link.url}`;
+    // 桌面端/不支持系统分享：直接复制组合文案
     try {
       await navigator.clipboard.writeText(combined);
-      showToast('已复制链接和描述！');
+      showToast('复制成功');
     } catch {
-      showToast('复制失败，请手动复制');
+      // 复制失败静默处理：链接不可见，提示用户也无法操作
     }
   }, [link.name, link.url, link.desc, showToast]);
 
