@@ -54,7 +54,7 @@ function Toast({ msg, show }: { msg: string; show: boolean }) {
 
   return createPortal(
     <div
-      className="fixed left-1/2 bottom-6 -translate-x-1/2 z-[100] pointer-events-none
+      className="fixed left-0 right-0 mx-auto w-fit max-w-[90vw] bottom-6 z-[100] pointer-events-none
                 px-4 py-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85
                 border border-white/20 shadow-lg text-sm text-popover-foreground
                 animate-in fade-in zoom-in-95 duration-200"
