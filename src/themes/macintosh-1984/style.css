@@ -98,7 +98,7 @@
   text-shadow: none;
 }
 
-[data-theme="macintosh-1984"] a.group {
+[data-theme="macintosh-1984"] div.group {
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -112,7 +112,7 @@
   padding-top: 1.65rem !important;
 }
 
-[data-theme="macintosh-1984"] a.group::before {
+[data-theme="macintosh-1984"] div.group::before {
   content: "";
   position: absolute;
   top: 0;
@@ -125,7 +125,7 @@
   pointer-events: none;
 }
 
-[data-theme="macintosh-1984"] a.group::after {
+[data-theme="macintosh-1984"] div.group::after {
   content: "";
   position: absolute;
   top: 0.25rem;
@@ -139,29 +139,29 @@
   pointer-events: none;
 }
 
-[data-theme="macintosh-1984"] a.group > * {
+[data-theme="macintosh-1984"] div.group > * {
   position: relative;
   z-index: 1;
 }
 
-[data-theme="macintosh-1984"] a.group:hover {
+[data-theme="macintosh-1984"] div.group:hover {
   border-color: var(--mac-ink);
   box-shadow: var(--mac-window-shadow-hover);
   transform: translate(-1px, -1px);
 }
 
-[data-theme="macintosh-1984"] a.group h3 {
+[data-theme="macintosh-1984"] div.group h3 {
   color: var(--mac-ink);
   font-size: 1rem;
   line-height: 1.2;
 }
 
-[data-theme="macintosh-1984"] a.group p {
+[data-theme="macintosh-1984"] div.group p {
   color: var(--mac-ink);
 }
 
-[data-theme="macintosh-1984"] a.group .icon-container,
-[data-theme="macintosh-1984"] a.group [class*="bg-muted"] {
+[data-theme="macintosh-1984"] div.group .icon-container,
+[data-theme="macintosh-1984"] div.group [class*="bg-muted"] {
   color: var(--mac-ink) !important;
   background: var(--mac-paper) !important;
   border: var(--mac-line) !important;
@@ -169,7 +169,7 @@
   box-shadow: var(--mac-inset-shadow) !important;
 }
 
-[data-theme="macintosh-1984"] a.group .link-tag,
+[data-theme="macintosh-1984"] div.group .link-tag,
 [data-theme="macintosh-1984"] .tag {
   color: var(--mac-ink);
   background: var(--mac-paper);

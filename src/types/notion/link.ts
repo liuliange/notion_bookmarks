@@ -25,6 +25,7 @@ export interface NotionLinkProperties {
     Name: TitlePropertyItemObjectResponse;
     URL: UrlPropertyItemObjectResponse;
     desc: RichTextPropertyItemObjectResponse;
+    口令?: RichTextPropertyItemObjectResponse;
     category1: SelectPropertyItemObjectResponse;
     category2: SelectPropertyItemObjectResponse;
     Tags: MultiSelectPropertyItemObjectResponse;
@@ -49,6 +50,8 @@ export interface Link {
     tags: string[];
     // 🆕 新增 cardColor 字段
     cardColor: string;
+    // 🆕 新增 command 字段（推广口令，可选）
+    command: string;
 }
 
 // Type Guard
@@ -97,5 +100,6 @@ export async function toLink(page: PageObjectResponse & { properties: NotionLink
         iconlink: extractUrl(props.iconlink),
         tags: extractMultiSelect(props.Tags),
         cardColor: extractColor(props.color),
+        command: props.口令 ? extractRichText(props.口令) : '',
     };
 }

@@ -126,7 +126,8 @@ body {
   padding: 2px;
   border-radius: 0;
   background: linear-gradient(135deg, hsl(286, 100%, 65%), hsl(180, 100%, 55%));
-  z-index: 1;
+  /* 高于内容层(z-index:2)，否则 hover 放大(scale)时内部内容上移会盖住这条渐变边框 */
+  z-index: 3;
   pointer-events: none;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;

@@ -2,7 +2,7 @@
 
 import { Link } from '@/types';
 import { motion } from 'framer-motion';
-import { IconExternalLink } from '@tabler/icons-react';
+import { Copy, Share2, ExternalLink } from 'lucide-react';
 import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,7 @@ function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: n
   return createPortal(
     <div 
       className="fixed p-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85
-                border shadow-lg max-w-xs z-[100] pointer-events-none
+                border border-white/20 shadow-lg max-w-xs z-[100] pointer-events-none
                 animate-in fade-in zoom-in-95 duration-200"
       style={{ 
         left: x,
@@ -41,6 +41,25 @@ function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: n
       }}
     >
       <p className="text-sm text-popover-foreground whitespace-normal">{content}</p>
+    </div>,
+    document.body
+  );
+}
+
+// 轻量 Toast 提示 - 复用 Tooltip 的 portal 模式，屏幕底部居中，自动消失
+function Toast({ msg, show }: { msg: string; show: boolean }) {
+  if (!show) return null;
+
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="fixed left-1/2 bottom-6 -translate-x-1/2 z-[100] pointer-events-none
+                px-4 py-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85
+                border border-white/20 shadow-lg text-sm text-popover-foreground
+                animate-in fade-in zoom-in-95 duration-200"
+    >
+      {msg}
     </div>,
     document.body
   );
@@ -158,6 +177,8 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
   const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
   const [iconState, setIconState] = useState(() => getInitialIconState(link));
   const iconContainerRef = useRef<HTMLDivElement>(null);
+  const [toast, setToast] = useState({ show: false, msg: '' });
+  const toastTimer = useRef<number | undefined>(undefined);
   const { theme } = useTheme();
 
   // 🆕 客户端挂载后再应用卡片配色，避免 hydration 不一致
@@ -178,6 +199,8 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
     event: React.MouseEvent<HTMLElement>,
     isTitle: boolean
   ) => {
+    // 仅桌面端（有 hover 能力）显示 Tooltip；触屏设备改为点击触发 Toast
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const setter = isTitle ? setTitleTooltip : setDescTooltip;
     setter({
@@ -194,9 +217,84 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
 
   const tagUseCardColor = cardColorData.applyColor && !theme?.includes('macintosh');
 
+  // 底部标签 + 操作按钮 共用的展示计算
+  const visibleTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
+
+  const actionClass = cn(
+    'link-tag inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-md transition-colors shrink-0 cursor-pointer hover:opacity-80 min-h-[1.25rem]',
+    tagUseCardColor
+      ? 'bg-white/20'
+      : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10'
+  );
+
+  const actionStyle = tagUseCardColor ? { color: cardColorData.textColor } : undefined;
+
   const handleMouseLeave = useCallback((isTitle: boolean) => {
       const setter = isTitle ? setTitleTooltip : setDescTooltip;
     setter({ show: false, x: 0, y: 0 });
+  }, []);
+
+  // 轻量 Toast：屏幕底部居中，默认 2 秒后自动消失；点击内容展示完整文本用 3 秒
+  const showToast = useCallback((msg: string, duration = 2000) => {
+    setToast({ show: true, msg });
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(
+      () => setToast({ show: false, msg: '' }),
+      duration
+    );
+  }, []);
+
+  // 触屏设备点击标题/描述：内容被 line-clamp 截断时复用 Toast 展示完整文本（3 秒）
+  const handleContentClick = useCallback((
+    event: React.MouseEvent<HTMLElement>,
+    type: 'title' | 'desc'
+  ) => {
+    // 仅触屏设备（无 hover 能力）走此逻辑；桌面端由 Tooltip 负责
+    if (typeof window !== 'undefined' && !window.matchMedia('(hover: none)').matches) return;
+    const target = type === 'title'
+      ? event.currentTarget.querySelector('h3')
+      : event.currentTarget.querySelector('p');
+    if (!target) return;
+    // 仅当内容被截断（scrollHeight 超出 clientHeight）时才触发 Toast
+    if (target.scrollHeight <= target.clientHeight) return;
+    showToast(type === 'title' ? link.name : (link.desc ?? ''), 3000);
+  }, [showToast, link.name, link.desc]);
+
+  const handleCopyCommand = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(link.command);
+      showToast('已复制，快去APP打开吧！');
+    } catch {
+      showToast('复制失败，请手动复制');
+    }
+  }, [link.command, showToast]);
+
+  const handleShare = useCallback(async () => {
+    // 移动端分享文案：标题 + 描述（链接由 navigator.share 的 url 字段单独携带）
+    const shareText = link.desc ? `${link.name} - ${link.desc}` : link.name;
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: link.name, text: shareText, url: link.url });
+        return; // 分享面板由系统控制，不显示 Toast
+      } catch {
+        // 用户取消分享，不回退复制（移动端不显示 Toast）
+        return;
+      }
+    }
+    // 桌面端/不支持系统分享：复制「标题 + 描述 + 链接」组合文案
+    const combined = link.desc
+      ? `${link.name}\n${link.desc}\n${link.url}`
+      : `${link.name}\n${link.url}`;
+    try {
+      await navigator.clipboard.writeText(combined);
+      showToast('已复制链接和描述！');
+    } catch {
+      showToast('复制失败，请手动复制');
+    }
+  }, [link.name, link.url, link.desc, showToast]);
+
+  useEffect(() => () => {
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
   }, []);
 
   // 当 link 变化时更新图片源
@@ -253,10 +351,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
 
   return (
     <>
-    <motion.a
-        href={link.url}
-        target="_blank"
-        rel="noopener noreferrer"
+    <motion.div
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         data-has-color={cardColorData.applyColor ? 'true' : undefined}
@@ -316,30 +411,26 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
                 className="relative"
                 onMouseEnter={(e) => handleMouseEnter(e, true)}
                 onMouseLeave={() => handleMouseLeave(true)}
+                onClick={(e) => handleContentClick(e, 'title')}
               >
                 <h3 className={cn(
-                  "text-lg line-clamp-1 pr-6 transition-colors",
+                  "text-lg line-clamp-1 transition-colors",
                   cardColorData.applyColor ? "text-current" : "text-foreground group-hover:text-primary"
                 )}>
                   {link.name}
                 </h3>
-              </div>
-              {/* 固定位置的外链图标 */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                <IconExternalLink 
-                  className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
-                />
               </div>
             </div>
           </div>
 
           {/* 描述行 */}
           {link.desc && (
-            <div 
-              className="relative flex-1 min-h-0"
-              onMouseEnter={(e) => handleMouseEnter(e, false)}
-              onMouseLeave={() => handleMouseLeave(false)}
-            >
+              <div 
+                className="relative flex-1 min-h-0"
+                onMouseEnter={(e) => handleMouseEnter(e, false)}
+                onMouseLeave={() => handleMouseLeave(false)}
+                onClick={(e) => handleContentClick(e, 'desc')}
+              >
               <p className="text-sm text-foreground/80
                          group-hover:text-foreground
                          line-clamp-2 transition-colors">
@@ -348,55 +439,89 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
             </div>
           )}
 
-          {/* 标签行 - 放在底部 */}
-          {(() => {
-            const visibleTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
-            if (visibleTags.length === 0) return null;
-            return (
-              <div className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0">
-                {visibleTags.slice(0, 3).map((tag) => (
-                  <span
-                    key={tag}
-                    className={cn(
-                      'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
-                      tagUseCardColor
-                        ? 'bg-white/20'
-                        : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10',
-                      tag.includes('力荐') && !tagUseCardColor && 'link-tag-featured'
-                    )}
-                    style={{
-                      color: tagUseCardColor ? cardColorData.textColor : undefined,
-                    }}
-                    title={tag}
-                  >
-                    <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
-                  </span>
-                ))}
-                {visibleTags.length > 3 && (
-                  <span
-                    className={cn(
-                      'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md shrink-0 transition-colors',
-                      tagUseCardColor
-                        ? 'bg-white/20'
-                        : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10'
-                    )}
-                    style={{
-                      color: tagUseCardColor ? cardColorData.textColor : undefined,
-                    }}
-                  >
-                    +{visibleTags.length - 3}
-                  </span>
-                )}
-              </div>
-            );
-          })()}
+          {/* 底部行：标签 + 操作按钮（同一行，不增加卡片高度） */}
+          <div className="flex items-center justify-between gap-2 mt-auto flex-shrink-0">
+            {/* 标签 */}
+            <div className="flex flex-wrap gap-1.5 min-w-0 flex-1">
+              {visibleTags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className={cn(
+                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
+                    tagUseCardColor
+                      ? 'bg-white/20'
+                      : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10',
+                    tag.includes('力荐') && !tagUseCardColor && 'link-tag-featured'
+                  )}
+                  style={{
+                    color: tagUseCardColor ? cardColorData.textColor : undefined,
+                  }}
+                  title={tag}
+                >
+                  <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
+                </span>
+              ))}
+              {visibleTags.length > 3 && (
+                <span
+                  className={cn(
+                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md shrink-0 transition-colors',
+                    tagUseCardColor
+                      ? 'bg-white/20'
+                      : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10'
+                  )}
+                  style={{
+                    color: tagUseCardColor ? cardColorData.textColor : undefined,
+                  }}
+                >
+                  +{visibleTags.length - 3}
+                </span>
+              )}
+            </div>
+
+            {/* 操作按钮 */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {link.command && (
+                <button
+                  type="button"
+                  onClick={handleCopyCommand}
+                  className={actionClass}
+                  style={actionStyle}
+                  title="复制口令"
+                  aria-label="复制口令"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleShare}
+                className={actionClass}
+                style={actionStyle}
+                title="分享"
+                aria-label="分享"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={actionClass}
+                style={actionStyle}
+                title="打开"
+                aria-label="打开"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* 渐变悬浮效果 */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-transparent via-transparent to-transparent
                       group-hover:from-primary/5 group-hover:via-primary/2 group-hover:to-transparent
                       transition-colors duration-500" />
-      </motion.a>
+      </motion.div>
 
       {/* 提示框 */}
       <Tooltip 
@@ -413,6 +538,9 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
           y={descTooltip.y}
         />
       )}
+
+      {/* Toast 提示 */}
+      <Toast msg={toast.msg} show={toast.show} />
     </>
   );
 }, (prev, next) => {
@@ -426,6 +554,7 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         prev.link.iconfile === next.link.iconfile &&
         prev.link.iconlink === next.link.iconlink &&
         prev.link.cardColor === next.link.cardColor &&
+        prev.link.command === next.link.command &&
         prev.className === next.className
     );
 });

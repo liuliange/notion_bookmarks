@@ -21,6 +21,17 @@
 - 修复赛博朋克主题侧边栏样式异常
 - 修复 LinkCard 图标超时状态机在开发环境（StrictMode）下偶发 "Maximum update depth exceeded" 报错：`getTimedOutIconState` 状态无变化时返回同一引用，timeout effect 增加 `showFallback` 依赖与守卫，消除冗余 setState 级联
 
+### 新增
+- 移动端点击被截断的标题/描述时，复用 Toast 弹出完整文本，3 秒后自动消失（仅触屏设备；桌面端保持悬停 Tooltip 行为）
+- 分享功能携带描述文案：移动端通过系统分享面板传递「标题 - 描述」，桌面端复制「标题 + 描述 + 链接」组合到剪贴板
+
+### 优化
+- 统一桌面端 Tooltip 与移动端 Toast 提示框边框为白色半透明描边（`border-white/20`）
+- `showToast` 支持自定义时长（复制/分享默认 2 秒，点击内容展示 3 秒）
+
+### 调整
+- 调整 cyberpunk 卡片渐变边框渲染层级（边框在 hover 放大时的显示问题待进一步修复，不影响使用）
+
 
 ## [1.0.0] - 2024-07-25
 

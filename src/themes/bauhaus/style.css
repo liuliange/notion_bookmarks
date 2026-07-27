@@ -132,6 +132,12 @@
   padding: 0;
 }
 
+/* 图标按钮内的 svg 约束到内容区高度，确保与文字标签等高（min-height 1.25rem + 2px 边框 + 0.15rem 内边距 => 内容约 0.7rem） */
+[data-theme="bauhaus-primary"] .group .link-tag svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
 [data-theme="bauhaus-primary"] .group .link-tag-featured {
   background: var(--bauhaus-yellow);
   color: var(--bauhaus-ink);
