@@ -270,33 +270,36 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
   }, [link.command, showToast]);
 
   const handleShare = useCallback(async () => {
-    // 复制/回退文案：标题 + 描述 + 链接（用户「只想拷贝」时的完整内容，不受系统分享面板控制）
+    // 复制内容：标题 + 描述 + 链接（单行组合，供「只想拷贝」的用户使用）
     const combined = link.desc
       ? `${link.name} - ${link.desc} - ${link.url}`
       : `${link.name} - ${link.url}`;
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      // 优先调起系统分享面板，便于分享到微信/朋友圈等
+      // 移动端：先在用户手势内写入剪贴板。
+      // 规避 iOS 取消分享后"用户手势过期"导致 writeText 被拒、复制静默失败的问题。
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(combined);
+        copied = true;
+      } catch {
+        // 复制失败静默处理：链接不可见，提示用户也无法操作
+      }
+      // 再调起系统分享面板：选 App 真正分享时不提示
       const shareText = link.desc ? `${link.name} - ${link.desc}` : link.name;
       try {
         await navigator.share({ title: link.name, text: shareText, url: link.url });
-        return;
       } catch {
-        // 用户取消/分享失败 → 回退直接写入剪贴板（内容可控、跨设备一致）
-        try {
-          await navigator.clipboard.writeText(combined);
-          showToast('复制成功');
-        } catch {
-          // 复制失败静默处理：链接不可见，提示用户也无法操作
-        }
-        return;
+        // 用户取消/关闭面板 → 剪贴板已就绪，提示复制成功
+        if (copied) showToast('复制成功');
       }
+      return;
     }
-    // 桌面端/不支持系统分享：直接复制组合文案
+    // 桌面端/不支持系统分享：直接复制组合并提示（成功才提示）
     try {
       await navigator.clipboard.writeText(combined);
       showToast('复制成功');
     } catch {
-      // 复制失败静默处理：链接不可见，提示用户也无法操作
+      // 复制失败静默处理
     }
   }, [link.name, link.url, link.desc, showToast]);
 
