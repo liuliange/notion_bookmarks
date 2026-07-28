@@ -290,14 +290,14 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         await navigator.share({ title: link.name, text: shareText, url: link.url });
       } catch {
         // 用户取消/关闭面板 → 剪贴板已就绪，提示复制成功
-        if (copied) showToast('复制成功');
+        if (copied) showToast('复制成功，快去分享吧！');
       }
       return;
     }
     // 桌面端/不支持系统分享：直接复制组合并提示（成功才提示）
     try {
       await navigator.clipboard.writeText(combined);
-      showToast('复制成功');
+      showToast('复制成功，快去分享吧！');
     } catch {
       // 复制失败静默处理
     }
