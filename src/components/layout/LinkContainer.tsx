@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useMemo, memo } from "react";
 import LinkCard from "@/components/ui/LinkCard";
+import TagAdBar from "@/components/ui/TagAdBar";
 import * as Icons from "lucide-react";
 import { Link, Category } from '@/types';
 import { useSearchContext } from '@/components/search-context';
@@ -11,12 +12,14 @@ interface LinkContainerProps {
   initialLinks: Link[];
   enabledCategories: Set<string>;
   categories: Category[];
+  bottomRecommendLinks?: Link[];
 }
 
 const LinkContainer = memo(function LinkContainer({
   initialLinks,
   enabledCategories,
   categories,
+  bottomRecommendLinks = [],
 }: LinkContainerProps) {
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
@@ -152,6 +155,13 @@ const LinkContainer = memo(function LinkContainer({
       {mounted && currentTime && (
         <div className="mt-12 text-center text-sm text-muted-foreground">
           最近更新：{currentTime}
+        </div>
+      )}
+
+      {/* 底部推荐栏：主内容区「最近更新」下方，与标签广告独立；桌面/移动均显示、可左右滑动 */}
+      {bottomRecommendLinks.length > 0 && (
+        <div className="mt-6 w-full">
+          <TagAdBar links={bottomRecommendLinks} />
         </div>
       )}
     </div>

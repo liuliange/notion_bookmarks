@@ -2,6 +2,7 @@
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
+import { BOTTOM_RECOMMEND_TAG } from '@/lib/tags';
 import Footer from '@/components/layout/Footer';
 import React from 'react';
 import HomeWidgets from '@/components/widgets/HomeWidgets';
@@ -54,6 +55,11 @@ export default async function HomePage() {
     };
   });
 
+  // 底部推荐栏：从原始 links 提取（避免被分类启用过滤剔除）
+  const bottomRecommendLinks = links.filter(
+    (link) => link.tags?.includes(BOTTOM_RECOMMEND_TAG)
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       {/* 移动端顶部导航 */}
@@ -72,6 +78,7 @@ export default async function HomePage() {
             initialLinks={processedLinks} 
             enabledCategories={enabledCategories}
             categories={activeCategories}
+            bottomRecommendLinks={bottomRecommendLinks}
           />
         </div>
       </main>

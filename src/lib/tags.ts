@@ -5,6 +5,9 @@ export const BADGE_TAGS = ['领优惠券', '好物精选', '人气优选', '口�
 // 特殊标签：仅用于代码识别广告位，不应作为普通标签展示给用户
 export const TAG_AD_TAG = '标签广告';
 
+// 底部推荐栏标签：在主内容区「最近更新」下方展示独立推荐链接，与标签广告无关
+export const BOTTOM_RECOMMEND_TAG = '底部推荐';
+
 // 普通卡片上需要隐藏的特殊标签（给代码看、不给用户看）
 export const HIDDEN_TAGS = [TAG_AD_TAG];
 
