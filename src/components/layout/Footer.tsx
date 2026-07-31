@@ -3,6 +3,7 @@
 import React, { memo, useState, useEffect } from 'react'
 import { WebsiteConfig } from '@/types'
 import { FaGithub, FaXTwitter } from 'react-icons/fa6'
+import { FloatingMenu } from '@/components/ui/FloatingMenu'
 import { cn } from '@/lib/utils'
 
 interface FooterProps {
@@ -50,8 +51,12 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
           const currentScrollY = window.scrollY
           const scrollDelta = currentScrollY - lastScrollY
           const threshold = 10
+          // 🆕 接近页面底部时强制显示，方便用户点击底部推荐与 Footer
+          const atBottom =
+            window.innerHeight + currentScrollY >=
+            document.documentElement.scrollHeight - 80
 
-          if (currentScrollY < 50) {
+          if (atBottom || currentScrollY < 50) {
             setIsVisible(true)
           } else if (scrollDelta > threshold) {
             setIsVisible(false)
@@ -76,15 +81,18 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
   }, [lastScrollY, isMobile])
 
   return (
-    <footer
-      className={cn(
-        "fixed bottom-0 left-0 right-0 bg-background border-t py-2 md:py-4 z-10 transition-transform duration-300 ease-in-out",
-        // 🆕 移动端：滑动控制显隐；桌面端：始终显示
-        isMobile ? (isVisible ? "translate-y-0" : "translate-y-full") : "translate-y-0",
-        className
-      )}
-    >
-      <div className="container mx-auto px-4">
+    <>
+      {/* 悬浮菜单：独立固定，不随 Footer 滚动显隐联动，桌面/移动始终可见 */}
+      <FloatingMenu />
+      <footer
+        className={cn(
+          "fixed bottom-0 left-0 right-0 bg-background border-t py-2 md:py-4 z-10 transition-transform duration-300 ease-in-out",
+          // 🆕 移动端：滑动控制显隐；桌面端：始终显示
+          isMobile ? (isVisible ? "translate-y-0" : "translate-y-full") : "translate-y-0",
+          className
+        )}
+      >
+        <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-1 md:gap-4 md:flex-row md:justify-between">
           <div className="flex items-center space-x-4">
             {config.SOCIAL_GITHUB && (
@@ -313,7 +321,8 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
           </div>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   )
 })
 

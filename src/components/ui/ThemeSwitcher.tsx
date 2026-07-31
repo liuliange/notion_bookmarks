@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
-import { IconPalette } from "@tabler/icons-react"
+import { Palette } from "lucide-react"
 import { useTheme } from "next-themes"
 import { getAllThemes } from "@/themes/registry"
 
@@ -57,7 +57,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
         className="theme-switcher-trigger p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
         aria-label="切换主题"
       >
-        <IconPalette className="w-5 h-5" />
+        <Palette className="w-5 h-5" />
       </motion.button>
 
       {isOpen && (

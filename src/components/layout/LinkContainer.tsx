@@ -71,7 +71,8 @@ const LinkContainer = memo(function LinkContainer({
   }, [linksByCategory]);
 
   return (
-    <div className="space-y-16 pb-12 w-full min-w-0">
+    <>
+      <div className="space-y-8 pb-3 w-full min-w-0">
       {searchQuery.trim() && (
         <div className="text-sm text-muted-foreground border-b pb-2">
           找到 <span className="font-medium text-foreground">{totalMatches}</span> 个相关结果
@@ -86,7 +87,7 @@ const LinkContainer = memo(function LinkContainer({
           <section
             key={category.id}
             id={category.id}
-            className="category-section scroll-mt-20 space-y-8"
+            className="category-section scroll-mt-20 space-y-4"
           >
             <div className="flex items-center space-x-3 pb-2 border-b">
               {category.iconName &&
@@ -103,7 +104,7 @@ const LinkContainer = memo(function LinkContainer({
               <h2 className="text-2xl font-bold tracking-tight">{category.name}</h2>
             </div>
 
-            <div className="space-y-12">
+            <div className="space-y-6">
               {Object.entries(categoryLinks).map(([subCategory, links]) => (
                 <div
                   key={`${category.id}-${subCategory
@@ -112,7 +113,7 @@ const LinkContainer = memo(function LinkContainer({
                   id={`${category.id}-${subCategory
                     .toLowerCase()
                     .replace(/\s+/g, "-")}`}
-                  className="space-y-4"
+                  className="space-y-2"
                 >
                   <div className="flex items-center space-x-2">
                     <div className="w-1 h-1 rounded-full bg-primary"></div>
@@ -152,19 +153,20 @@ const LinkContainer = memo(function LinkContainer({
         </div>
       )}
 
-      {mounted && currentTime && (
-        <div className="mt-12 text-center text-sm text-muted-foreground">
-          最近更新：{currentTime}
-        </div>
-      )}
-
-      {/* 底部推荐栏：主内容区「最近更新」下方，与标签广告独立；桌面/移动均显示、可左右滑动 */}
+      {/* 底部推荐栏：移到「最近更新」之前，留在文档流中，避免被 Footer 顶到与悬浮菜单重叠 */}
       {bottomRecommendLinks.length > 0 && (
-        <div className="mt-6 w-full">
+        <div className="mt-8 w-full">
           <TagAdBar links={bottomRecommendLinks} />
         </div>
       )}
+
+      {mounted && currentTime && (
+        <div className="mt-6 text-center text-sm text-muted-foreground">
+          最近更新：{currentTime}
+        </div>
+      )}
     </div>
+    </>
   );
 });
 
