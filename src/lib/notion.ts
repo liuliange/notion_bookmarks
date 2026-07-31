@@ -143,8 +143,10 @@ export const getWebsiteConfig = cache(async () => {
             GA_ID: configMap.GA_ID ?? '',
             // 小组件列表（已废弃，保留兼容）
             WIDGET_CONFIG: configMap.WIDGET_CONFIG ?? '',
-            // 推广广告位角标配色（如：热销,#FF6B6B,上新,#4ECDC4）
-            WIDGET_BADGE_CONFIG: configMap.WIDGET_BADGE_CONFIG ?? '',
+            // 推广广告位角标配色（标签名,颜色 配对，如：领优惠券,#FF6B6B,好物精选,#4ECDC4）
+            WIDGET_BADGE_CONFIG:
+                configMap.WIDGET_BADGE_CONFIG ??
+                '领优惠券,#FF6B6B,好物精选,#4ECDC4,人气优选,#FFB347,口碑推荐,#A29BFE,编辑推荐,#5B8DEF',
         };
 
         return config;

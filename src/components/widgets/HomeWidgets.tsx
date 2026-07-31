@@ -11,19 +11,19 @@ interface HomeWidgetsProps {
   config: WebsiteConfig;
 }
 
-// 解析角标配置：热销,#FF6B6B,上新,#4ECDC4,... -> [{label,color}, ...]
-function parseBadgeConfig(raw?: string): { label: string; color: string }[] {
-  if (!raw) return [];
+// 解析角标配置：领优惠券,#FF6B6B,好物精选,#4ECDC4,... -> { 领优惠券: '#FF6B6B', ... }
+function parseBadgeMap(raw?: string): Record<string, string> {
+  const map: Record<string, string> = {};
+  if (!raw) return map;
   const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
-  const badges: { label: string; color: string }[] = [];
   for (let i = 0; i + 1 < parts.length; i += 2) {
-    badges.push({ label: parts[i], color: parts[i + 1] });
+    map[parts[i]] = parts[i + 1];
   }
-  return badges;
+  return map;
 }
 
 export default function HomeWidgets({ config }: HomeWidgetsProps) {
-  const badgeConfig = parseBadgeConfig(config.WIDGET_BADGE_CONFIG);
+  const badgeMap = parseBadgeMap(config.WIDGET_BADGE_CONFIG);
 
   // 推广广告位数据
   const [promotedLinks, setPromotedLinks] = useState<Link[]>([]);
@@ -66,7 +66,6 @@ export default function HomeWidgets({ config }: HomeWidgetsProps) {
   const hasTagAds = !loadingTagAds && tagAdLinks.length > 0;
   const hasPromoted = !loadingPromoted && promotedLinks.length > 0;
   const { theme } = useTheme();
-  const isMacintosh = theme?.includes('macintosh');
 
   return (
     <>
@@ -80,23 +79,11 @@ export default function HomeWidgets({ config }: HomeWidgetsProps) {
             className="relative"
           >
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none">
-              {promotedLinks.map((link, idx) => {
-                const badge = badgeConfig[idx]; // 配置缺失则该卡不显示角标
-                return (
-                  <div key={link.id} className="relative flex-1 min-w-[180px] max-w-[220px]">
-                    {/* 右上角贴边角标，不占用标题空间；麦金塔主题下移避免遮挡标题栏装饰 */}
-                    {badge && (
-                      <span
-                        className={`absolute ${isMacintosh ? 'top-5' : 'top-2'} right-2 z-10 rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white pointer-events-none`}
-                        style={{ backgroundColor: badge.color }}
-                      >
-                        {badge.label}
-                      </span>
-                    )}
-                    <LinkCard link={link} />
-                  </div>
-                );
-              })}
+              {promotedLinks.map((link) => (
+                <div key={link.id} className="flex-1 min-w-[180px] max-w-[220px]">
+                  <LinkCard link={link} badgeMap={badgeMap} />
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>

@@ -14,12 +14,14 @@ import {
   getLoadedIconState,
   getTimedOutIconState,
 } from '@/lib/link-icon';
-import { HIDDEN_TAGS } from '@/lib/tags';
+import { HIDDEN_TAGS, BADGE_TAGS } from '@/lib/tags';
 import { useTheme } from 'next-themes';
 
 interface LinkCardProps {
   link: Link;
   className?: string;
+  // 标签名 → 颜色 映射（来自 WIDGET_BADGE_CONFIG），用于底部角标标签独立着色
+  badgeMap?: Record<string, string>;
 }
 
 // 提示框组件 - 保持不变，可以考虑提取但此处暂保留
@@ -171,7 +173,7 @@ const OptimisedLinkIcon = memo(function OptimisedLinkIcon({
 }, (prev, next) => prev.src === next.src && prev.alt === next.alt);
 
 
-const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
+const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardProps) {
   const [mounted, setMounted] = useState(false);
   const [titleTooltip, setTitleTooltip] = useState({ show: false, x: 0, y: 0 });
   const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
@@ -217,8 +219,13 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
 
   const tagUseCardColor = cardColorData.applyColor && !theme?.includes('macintosh');
 
-  // 底部标签 + 操作按钮 共用的展示计算
-  const visibleTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
+  // 底部标签计算：分离角标标签（领优惠券/好物精选等）与普通标签
+  // 角标标签始终显示在前面，使用 WIDGET_BADGE_CONFIG 中的独立颜色，不受卡片配色影响
+  const allTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
+  const badgeTags = (badgeMap ? allTags.filter((t) => BADGE_TAGS.includes(t) && badgeMap[t]) : [])
+    .sort((a, b) => BADGE_TAGS.indexOf(a) - BADGE_TAGS.indexOf(b));
+  const normalTags = allTags.filter((t) => !BADGE_TAGS.includes(t));
+  const visibleTags = [...badgeTags, ...normalTags];
 
   const actionClass = cn(
     'link-tag inline-flex items-center justify-center gap-1 px-2 py-0.5 text-xs rounded-md transition-colors shrink-0 cursor-pointer hover:opacity-80 min-h-[1.25rem]',
@@ -453,24 +460,28 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
           <div className="flex items-center justify-between gap-2 mt-auto flex-shrink-0">
             {/* 标签 */}
             <div className="flex flex-wrap gap-1.5 min-w-0 flex-1">
-              {visibleTags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className={cn(
-                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
-                    tagUseCardColor
-                      ? 'bg-white/20'
-                      : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10',
-                    tag.includes('力荐') && !tagUseCardColor && 'link-tag-featured'
-                  )}
-                  style={{
-                    color: tagUseCardColor ? cardColorData.textColor : undefined,
-                  }}
-                  title={tag}
-                >
-                  <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
-                </span>
-              ))}
+              {visibleTags.slice(0, 3).map((tag) => {
+                const badgeColor = badgeMap?.[tag];
+                const isBadge = Boolean(badgeColor);
+                return (
+                  <span
+                    key={tag}
+                    className={cn(
+                      'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md transition-colors',
+                      isBadge
+                        ? 'text-white border-transparent'
+                        : tagUseCardColor
+                          ? 'bg-white/20'
+                          : 'bg-foreground/15 text-foreground/90 group-hover:bg-primary/15 group-hover:text-primary border border-foreground/10',
+                      !isBadge && tag.includes('力荐') && !tagUseCardColor && 'link-tag-featured'
+                    )}
+                    style={isBadge ? { backgroundColor: badgeColor } : (tagUseCardColor ? { color: cardColorData.textColor } : undefined)}
+                    title={tag}
+                  >
+                    <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
+                  </span>
+                );
+              })}
               {visibleTags.length > 3 && (
                 <span
                   className={cn(
@@ -565,7 +576,8 @@ const LinkCard = memo(function LinkCard({ link, className }: LinkCardProps) {
         prev.link.iconlink === next.link.iconlink &&
         prev.link.cardColor === next.link.cardColor &&
         prev.link.command === next.link.command &&
-        prev.className === next.className
+        prev.className === next.className &&
+        prev.badgeMap === next.badgeMap
     );
 });
 
