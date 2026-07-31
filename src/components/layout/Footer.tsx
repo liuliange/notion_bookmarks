@@ -36,8 +36,7 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
     if (!isMobile) return
 
     const checkHeight = () => {
-      const isShortPage =
-        document.documentElement.scrollHeight <= document.documentElement.clientHeight
+      const isShortPage = document.documentElement.scrollHeight <= window.innerHeight
       if (isShortPage) {
         setIsVisible(true)
       }
@@ -52,13 +51,12 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
           const currentScrollY = window.scrollY
           const scrollDelta = currentScrollY - lastScrollY
           const threshold = 10
-          // 距文档真实底部剩余距离（用 clientHeight 而非 innerHeight，避免地址栏伸缩误判）
-          const distanceToBottom =
-            document.documentElement.scrollHeight -
-            document.documentElement.clientHeight -
-            currentScrollY
+          // 🆕 接近页面底部时强制显示，方便用户点击底部推荐与 Footer
+          const atBottom =
+            window.innerHeight + currentScrollY >=
+            document.documentElement.scrollHeight - 80
 
-          if (distanceToBottom <= 80 || currentScrollY < 50) {
+          if (atBottom || currentScrollY < 50) {
             setIsVisible(true)
           } else if (scrollDelta > threshold) {
             setIsVisible(false)

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { ArrowUp, Send, Plus, MessageSquare } from "lucide-react";
 import { SiNotion, SiTencentqq } from "react-icons/si";
+import { FaWeixin } from "react-icons/fa6";
 
 type MenuItem = {
   key: string;
@@ -20,6 +21,13 @@ const MENU_ITEMS: MenuItem[] = [
     icon: () => <SiNotion className="w-4 h-4" />,
     action: "link",
     href: "https://199909.notion.site/faebd1c82aca47669b20fa1b8c37106b?source=copy_link",
+  },
+  {
+    key: "wechat",
+    label: "微信公众号",
+    icon: () => <FaWeixin className="w-4 h-4" />,
+    action: "link",
+    href: "https://my.feishu.cn/wiki/RMKjwYflBiru4qkyktjcHl7mnLh?from=from_copylink",
   },
   {
     key: "feishu",
