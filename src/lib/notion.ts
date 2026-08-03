@@ -14,6 +14,7 @@ import {
     isNotionCategoryPage,
     toCategory
 } from '@/types';
+import { isValidTheme } from '@/themes/registry';
 
 export const notion = new Client({
     auth: envConfig.NOTION_TOKEN,
@@ -121,8 +122,11 @@ export const getWebsiteConfig = cache(async () => {
             SITE_AUTHOR: configMap.SITE_AUTHOR ?? '',
             SITE_FOOTER: configMap.SITE_FOOTER ?? '',
             SITE_FAVICON: favicon,
-            // 主题配置
-            THEME_NAME: configMap.THEME_NAME ?? 'simple',
+            // 主题配置：数据库 THEME_NAME 控制网站默认主题；无效值回退到 simple-dark
+            THEME_NAME: (() => {
+              const raw = configMap.THEME_NAME ?? 'simple-dark'
+              return isValidTheme(raw) ? raw : 'simple-dark'
+            })(),
             SHOW_THEME_SWITCHER: configMap.SHOW_THEME_SWITCHER ?? 'true',
 
             // 社交媒体配置

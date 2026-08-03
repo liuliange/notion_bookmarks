@@ -377,7 +377,7 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
           color: cardColorData.textColor,
         } : undefined}
         className={cn(
-          "group flex h-full flex-col p-4 rounded-xl border border-border/50 bg-card hover:border-primary/50 transition-all",
+          "group flex h-full flex-col p-3 rounded-xl border border-border/50 bg-card hover:border-primary/50 transition-all",
           "hover:shadow-lg hover:shadow-primary/5",
           "w-full max-w-full",
           className
@@ -431,7 +431,7 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
                 onClick={(e) => handleContentClick(e, 'title')}
               >
                 <h3 className={cn(
-                  "text-lg line-clamp-1 transition-colors",
+                  "text-base line-clamp-1 transition-colors",
                   cardColorData.applyColor ? "text-current" : "text-foreground group-hover:text-primary"
                 )}>
                   {link.name}
@@ -448,7 +448,7 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
                 onMouseLeave={() => handleMouseLeave(false)}
                 onClick={(e) => handleContentClick(e, 'desc')}
               >
-              <p className="text-sm text-foreground/80
+              <p className="text-xs text-foreground/80
                          group-hover:text-foreground
                          line-clamp-2 transition-colors">
                 {link.desc}

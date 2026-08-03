@@ -3,11 +3,17 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({
+  children,
+  defaultTheme = "simple-dark",
+}: {
+  children: React.ReactNode
+  defaultTheme?: string
+}) {
   return (
-    <NextThemesProvider 
+    <NextThemesProvider
       attribute="data-theme"
-      defaultTheme="bauhaus-primary"
+      defaultTheme={defaultTheme}
       enableSystem={false}
     >
       {children}

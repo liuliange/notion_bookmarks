@@ -76,7 +76,7 @@ export default async function RootLayout({
         <GoogleAnalytics gaId={config.GA_ID || ''} />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
+        <ThemeProvider defaultTheme={config.THEME_NAME}>
           <SearchProvider>
             {children}
           </SearchProvider>

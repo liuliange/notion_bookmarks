@@ -40,3 +40,8 @@ export function getThemeMode(themeName: string): 'light' | 'dark' {
   const theme = themes.find(t => t.name === themeName)
   return theme?.mode || 'light'
 }
+
+// 校验主题名是否真实存在于注册表中
+export function isValidTheme(themeName: string): boolean {
+  return themes.some(t => t.name === themeName)
+}
