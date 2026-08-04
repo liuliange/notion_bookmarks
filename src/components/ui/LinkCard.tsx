@@ -408,7 +408,7 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
         {/* 内容容器 */}
         <div className="flex flex-col h-full gap-2">
           {/* 图标和名称行 */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* 图标容器 */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
