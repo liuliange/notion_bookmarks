@@ -7,7 +7,7 @@ export async function GET() {
         const allLinks = await getLinks();
 
         const tagAdLinks = allLinks.filter(
-            link => Array.isArray(link.tags) && link.tags.includes(TAG_AD_TAG)
+            link => link.system === TAG_AD_TAG
         );
 
         return NextResponse.json({

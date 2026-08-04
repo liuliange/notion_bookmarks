@@ -56,8 +56,9 @@ export default async function HomePage() {
   });
 
   // 底部推荐栏：从原始 links 提取（避免被分类启用过滤剔除）
+  // 底部推荐标签现在存放在 system 单选字段
   const bottomRecommendLinks = links.filter(
-    (link) => link.tags?.includes(BOTTOM_RECOMMEND_TAG)
+    (link) => link.system === BOTTOM_RECOMMEND_TAG
   );
 
   return (

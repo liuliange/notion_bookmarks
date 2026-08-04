@@ -5,7 +5,6 @@ import {
     UrlPropertyItemObjectResponse,
     SelectPropertyItemObjectResponse,
     FilesPropertyItemObjectResponse,
-    MultiSelectPropertyItemObjectResponse,
     CreatedTimePropertyItemObjectResponse
 } from "@notionhq/client/build/src/api-endpoints";
 import {
@@ -15,7 +14,6 @@ import {
     extractUrl,
     extractSelect,
     extractFileInfo,
-    extractMultiSelect,
     extractColor
 } from "./common";
 import { downloadIcon } from '@/lib/icon-sync';
@@ -28,7 +26,9 @@ export interface NotionLinkProperties {
     口令?: RichTextPropertyItemObjectResponse;
     category1: SelectPropertyItemObjectResponse;
     category2: SelectPropertyItemObjectResponse;
-    Tags: MultiSelectPropertyItemObjectResponse;
+    Tags: SelectPropertyItemObjectResponse;
+    promo: SelectPropertyItemObjectResponse;
+    system: SelectPropertyItemObjectResponse;
     iconfile: FilesPropertyItemObjectResponse;
     iconlink: UrlPropertyItemObjectResponse;
     Created: CreatedTimePropertyItemObjectResponse;
@@ -48,6 +48,10 @@ export interface Link {
     iconfile: string;
     iconlink: string;
     tags: string[];
+    // 🆕 新增 promo 字段（单选）：承载角标标签（领优惠券/好物精选等5个）
+    promo: string;
+    // 🆕 新增 system 字段（单选）：承载系统隐藏标签（底部推荐/标签广告）
+    system: string;
     // 🆕 新增 cardColor 字段
     cardColor: string;
     // 🆕 新增 command 字段（推广口令，可选）
@@ -68,6 +72,8 @@ export function isNotionLinkPage(
         'category1' in props &&
         'category2' in props &&
         'Tags' in props &&
+        'promo' in props &&
+        'system' in props &&
         'iconfile' in props &&
         'iconlink' in props
         // ✅ color 字段可选，不强制检查
@@ -98,7 +104,9 @@ export async function toLink(page: PageObjectResponse & { properties: NotionLink
         category2: extractSelect(props.category2) || '默认',
         iconfile,
         iconlink: extractUrl(props.iconlink),
-        tags: extractMultiSelect(props.Tags),
+        tags: props.Tags ? [extractSelect(props.Tags)].filter(Boolean) as string[] : [],
+        promo: extractSelect(props.promo) || '',
+        system: extractSelect(props.system) || '',
         cardColor: extractColor(props.color),
         command: props.口令 ? extractRichText(props.口令) : '',
     };

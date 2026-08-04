@@ -11,20 +11,7 @@ interface HomeWidgetsProps {
   config: WebsiteConfig;
 }
 
-// 解析角标配置：领优惠券,#FF6B6B,好物精选,#4ECDC4,... -> { 领优惠券: '#FF6B6B', ... }
-function parseBadgeMap(raw?: string): Record<string, string> {
-  const map: Record<string, string> = {};
-  if (!raw) return map;
-  const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
-  for (let i = 0; i + 1 < parts.length; i += 2) {
-    map[parts[i]] = parts[i + 1];
-  }
-  return map;
-}
-
 export default function HomeWidgets({ config }: HomeWidgetsProps) {
-  const badgeMap = parseBadgeMap(config.WIDGET_BADGE_CONFIG);
-
   // 推广广告位数据
   const [promotedLinks, setPromotedLinks] = useState<Link[]>([]);
   const [loadingPromoted, setLoadingPromoted] = useState(true);
@@ -78,11 +65,9 @@ export default function HomeWidgets({ config }: HomeWidgetsProps) {
             transition={{ duration: 0.5 }}
             className="relative"
           >
-            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
               {promotedLinks.map((link) => (
-                <div key={link.id} className="flex-1 min-w-[180px] max-w-[220px]">
-                  <LinkCard link={link} badgeMap={badgeMap} />
-                </div>
+                <LinkCard key={link.id} link={link} className="w-full" showPromoBadge />
               ))}
             </div>
           </motion.div>

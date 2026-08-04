@@ -28,7 +28,6 @@
   --shadow-md: 0 0 20px hsla(286, 100%, 65%, 0.4), 0 0 10px hsla(180, 100%, 55%, 0.3);
   --shadow-lg: 0 0 40px hsla(286, 100%, 65%, 0.7), 0 0 20px hsla(180, 100%, 55%, 0.5);
   font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-  font-size: 1.08rem;
   font-weight: 500;
   letter-spacing: 0.02em;
 }
@@ -49,7 +48,6 @@
 [data-theme="cyberpunk-dark"] .group,
 [data-theme="cyberpunk-dark"] .platform-tab {
   font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-  font-size: 1.08rem;
   font-weight: 500;
   letter-spacing: 0.02em;
 }

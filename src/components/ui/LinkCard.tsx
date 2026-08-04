@@ -14,14 +14,25 @@ import {
   getLoadedIconState,
   getTimedOutIconState,
 } from '@/lib/link-icon';
-import { HIDDEN_TAGS, BADGE_TAGS } from '@/lib/tags';
+import { HIDDEN_TAGS, BADGE_COLORS } from '@/lib/tags';
 import { useTheme } from 'next-themes';
+
+// 角标名称 → 颜色 的稳定映射：按角标名首次出现顺序从 BADGE_COLORS 轮转分配，
+// 保证同一次运行内同名角标颜色固定，且不依赖任何外部配置。
+const badgeColorCache = new Map<string, string>();
+function getBadgeColor(name: string): string {
+  if (!badgeColorCache.has(name)) {
+    const idx = badgeColorCache.size % BADGE_COLORS.length;
+    badgeColorCache.set(name, BADGE_COLORS[idx]);
+  }
+  return badgeColorCache.get(name)!;
+}
 
 interface LinkCardProps {
   link: Link;
   className?: string;
-  // 标签名 → 颜色 映射（来自 WIDGET_BADGE_CONFIG），用于底部角标标签独立着色
-  badgeMap?: Record<string, string>;
+  // 仅推广位（置顶卡片）显示 promo 角标；普通列表传 false/不传，隐藏 promo 角标
+  showPromoBadge?: boolean;
 }
 
 // 提示框组件 - 保持不变，可以考虑提取但此处暂保留
@@ -173,7 +184,7 @@ const OptimisedLinkIcon = memo(function OptimisedLinkIcon({
 }, (prev, next) => prev.src === next.src && prev.alt === next.alt);
 
 
-const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardProps) {
+const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = false }: LinkCardProps) {
   const [mounted, setMounted] = useState(false);
   const [titleTooltip, setTitleTooltip] = useState({ show: false, x: 0, y: 0 });
   const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
@@ -219,12 +230,15 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
 
   const tagUseCardColor = cardColorData.applyColor && !theme?.includes('macintosh');
 
-  // 底部标签计算：分离角标标签（领优惠券/好物精选等）与普通标签
-  // 角标标签始终显示在前面，使用 WIDGET_BADGE_CONFIG 中的独立颜色，不受卡片配色影响
-  const allTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
-  const badgeTags = (badgeMap ? allTags.filter((t) => BADGE_TAGS.includes(t) && badgeMap[t]) : [])
-    .sort((a, b) => BADGE_TAGS.indexOf(a) - BADGE_TAGS.indexOf(b));
-  const normalTags = allTags.filter((t) => !BADGE_TAGS.includes(t));
+  // 底部标签计算：
+  // - 角标标签来自 promo 单选字段：任何不在 HIDDEN_TAGS 里的非空值都视为角标，
+  //   名称完全由 Notion 库 promo 选项决定，颜色按 BADGE_COLORS 调色板稳定分配
+  // - 系统隐藏标签（底部推荐/标签广告）来自 system 单选字段，不展示给用户
+  // - 普通用户自定义标签来自 tags 单选字段（最多 1 个）
+  // 角标仅当 showPromoBadge（推广位/置顶卡片）为真时展示；普通列表隐藏 promo 角标
+  const promoTag = showPromoBadge && link.promo && !HIDDEN_TAGS.includes(link.promo) ? link.promo : '';
+  const badgeTags = promoTag ? [promoTag] : [];
+  const normalTags = (link.tags ?? []).filter((t) => !HIDDEN_TAGS.includes(t));
   const visibleTags = [...badgeTags, ...normalTags];
 
   const actionClass = cn(
@@ -319,10 +333,18 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
     setIconState(getInitialIconState(link));
   }, [link]);
 
+  // 每张卡片只对当前 link 启动一次超时兜底，避免 effect 依赖变化导致的递归更新
+  const timeoutStartedRef = useRef(false);
   useEffect(() => {
+    timeoutStartedRef.current = false;
+  }, [link]);
+
+  useEffect(() => {
+    if (timeoutStartedRef.current) return;
     if (iconState.isLoaded || iconState.src === FALLBACK_ICON_SRC || iconState.showFallback) {
       return;
     }
+    timeoutStartedRef.current = true;
 
     const timeoutId = window.setTimeout(() => {
       setIconState((state) => {
@@ -461,8 +483,8 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
             {/* 标签 */}
             <div className="flex flex-wrap gap-1.5 min-w-0 flex-1">
               {visibleTags.slice(0, 3).map((tag) => {
-                const badgeColor = badgeMap?.[tag];
-                const isBadge = Boolean(badgeColor);
+                const isBadge = tag === promoTag;
+                const badgeColor = isBadge ? getBadgeColor(tag) : undefined;
                 return (
                   <span
                     key={tag}
@@ -576,8 +598,7 @@ const LinkCard = memo(function LinkCard({ link, className, badgeMap }: LinkCardP
         prev.link.iconlink === next.link.iconlink &&
         prev.link.cardColor === next.link.cardColor &&
         prev.link.command === next.link.command &&
-        prev.className === next.className &&
-        prev.badgeMap === next.badgeMap
+        prev.className === next.className
     );
 });
 
