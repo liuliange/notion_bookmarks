@@ -399,7 +399,7 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
           color: cardColorData.textColor,
         } : undefined}
         className={cn(
-          "group flex h-full flex-col p-3 rounded-xl border border-border/50 bg-card hover:border-primary/50 transition-all",
+          "group flex h-full flex-col p-2.5 rounded-xl border border-border/50 bg-card hover:border-primary/50 transition-all",
           "hover:shadow-lg hover:shadow-primary/5",
           "w-full max-w-full",
           className
@@ -522,7 +522,7 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
             </div>
 
             {/* 操作按钮 */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               {link.command && (
                 <button
                   type="button"
