@@ -1,17 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { WebsiteConfig, Link } from '@/types';
+import { Link } from '@/types';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import LinkCard from '@/components/ui/LinkCard';
 import TagAdBar from '@/components/ui/TagAdBar';
 
 interface HomeWidgetsProps {
-  config: WebsiteConfig;
 }
 
-export default function HomeWidgets({ config }: HomeWidgetsProps) {
+export default function HomeWidgets({ }: HomeWidgetsProps) {
   // 推广广告位数据
   const [promotedLinks, setPromotedLinks] = useState<Link[]>([]);
   const [loadingPromoted, setLoadingPromoted] = useState(true);
