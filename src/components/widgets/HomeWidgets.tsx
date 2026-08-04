@@ -7,10 +7,7 @@ import { useTheme } from 'next-themes';
 import LinkCard from '@/components/ui/LinkCard';
 import TagAdBar from '@/components/ui/TagAdBar';
 
-interface HomeWidgetsProps {
-}
-
-export default function HomeWidgets({ }: HomeWidgetsProps) {
+export default function HomeWidgets() {
   // 推广广告位数据
   const [promotedLinks, setPromotedLinks] = useState<Link[]>([]);
   const [loadingPromoted, setLoadingPromoted] = useState(true);
