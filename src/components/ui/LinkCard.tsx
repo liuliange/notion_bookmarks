@@ -35,25 +35,66 @@ interface LinkCardProps {
   showPromoBadge?: boolean;
 }
 
-// 提示框组件 - 保持不变，可以考虑提取但此处暂保留
-function Tooltip({ content, show, x, y }: { content: string; show: boolean; x: number; y: number }) {
+// 提示框组件 - 完整显示被折叠的标题/描述。
+// 设计原则：
+//   1. 宽度固定 = 被点击卡片的列宽，绝不横跨两列、不穿透邻卡
+//   2. 内容在列宽内自动换行，多行完整显示
+//   3. 永远显示在卡片正上方（间距 4px）；上方空间不足时贴视口顶部，绝不往下弹
+//   4. 宽度自适应内容（fit-content）：短标题紧凑不空，长内容在列宽内自动换行，左右列一致
+function Tooltip({ content, show, cardRect }: { content: string; show: boolean; cardRect: DOMRect | null }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [adjustedStyle, setAdjustedStyle] = useState<{ left: number; top: number } | null>(null);
+
+  useEffect(() => {
+    if (!show || !cardRect) {
+      setAdjustedStyle(null);
+      return;
+    }
+    const raf = requestAnimationFrame(() => {
+      const el = ref.current;
+      if (!el) return;
+      const tooltipRect = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const gap = 8;
+
+      // 水平：严格对齐卡片左边缘，做视口边界裁剪
+      let left = cardRect.left;
+      const tooltipW = tooltipRect.width;
+      if (left + tooltipW > vw - gap) {
+        left = Math.max(gap, vw - tooltipW - gap);
+      }
+      if (left < gap) left = gap;
+
+      // 垂直：始终显示在卡片正上方
+      let top = cardRect.top - tooltipRect.height - 4;
+      if (top < gap) top = gap;
+
+      setAdjustedStyle({ left, top });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [show, cardRect, content]);
+
   if (!show) return null;
-  
-  // 确保在客户端环境中执行
   if (typeof window === 'undefined' || typeof document === 'undefined') return null;
-  
+
+  const finalLeft = adjustedStyle?.left ?? (cardRect?.left ?? 0);
+  const finalTop = adjustedStyle?.top ?? (cardRect?.top ?? 0);
+
   return createPortal(
-    <div 
+    <div
+      ref={ref}
       className="fixed p-2 rounded-lg bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/85
-                border border-white/20 shadow-lg max-w-xs z-[100] pointer-events-none
-                animate-in fade-in zoom-in-95 duration-200"
-      style={{ 
-        left: x,
-        top: y - 8,
-        transform: 'translateY(-100%)'
+                border border-white/20 shadow-lg z-[100] pointer-events-none
+                animate-in fade-in zoom-in-95 duration-200 tooltip-popup"
+      style={{
+        left: finalLeft,
+        top: finalTop,
+        width: 'fit-content',
+        maxWidth: cardRect ? `${cardRect.width}px` : 'calc(100vw - 16px)',
+        visibility: adjustedStyle ? 'visible' : 'hidden',
       }}
     >
-      <p className="text-sm text-popover-foreground whitespace-normal">{content}</p>
+      <p className="text-sm text-popover-foreground break-words leading-snug">{content}</p>
     </div>,
     document.body
   );
@@ -186,12 +227,16 @@ const OptimisedLinkIcon = memo(function OptimisedLinkIcon({
 
 const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = false }: LinkCardProps) {
   const [mounted, setMounted] = useState(false);
-  const [titleTooltip, setTitleTooltip] = useState({ show: false, x: 0, y: 0 });
-  const [descTooltip, setDescTooltip] = useState({ show: false, x: 0, y: 0 });
+  const [titleTooltip, setTitleTooltip] = useState<{ show: boolean; rect: DOMRect | null }>({ show: false, rect: null });
+  const [descTooltip, setDescTooltip] = useState<{ show: boolean; rect: DOMRect | null }>({ show: false, rect: null });
   const [iconState, setIconState] = useState(() => getInitialIconState(link));
   const iconContainerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState({ show: false, msg: '' });
   const toastTimer = useRef<number | undefined>(undefined);
+  // 触屏设备点击被折叠标题/描述时，提示框显示在卡片上方（而非屏幕底部）
+  const [touchTooltip, setTouchTooltip] = useState<{ show: boolean; rect: DOMRect | null; content: string }>({ show: false, rect: null, content: '' });
+  const touchTimer = useRef<number | undefined>(undefined);
   const { theme } = useTheme();
 
   // 🆕 客户端挂载后再应用卡片配色，避免 hydration 不一致
@@ -214,13 +259,19 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
   ) => {
     // 仅桌面端（有 hover 能力）显示 Tooltip；触屏设备改为点击触发 Toast
     if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
-    const rect = event.currentTarget.getBoundingClientRect();
+    // 仅当文本被 line-clamp 折叠（scrollHeight 超出 clientHeight）时才弹提示框；
+    // 未折叠则不弹，避免无意义遮挡。与移动端点击展示完整文本的判断逻辑一致。
+    const target = isTitle
+      ? event.currentTarget.querySelector('h3')
+      : event.currentTarget.querySelector('p');
+    if (target && target.scrollHeight <= target.clientHeight) return;
+
+    // 锚定到「整张卡片」，Tooltip 用卡片 rect 定位
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
     const setter = isTitle ? setTitleTooltip : setDescTooltip;
-    setter({
-      show: true,
-      x: rect.left,
-      y: rect.top
-    });
+    setter({ show: true, rect });
   }, []);
 
   // 有颜色配置时应用 Notion 配色，否则沿用主题默认样式（mounted 后再应用）
@@ -252,7 +303,7 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
 
   const handleMouseLeave = useCallback((isTitle: boolean) => {
       const setter = isTitle ? setTitleTooltip : setDescTooltip;
-    setter({ show: false, x: 0, y: 0 });
+    setter({ show: false, rect: null });
   }, []);
 
   // 轻量 Toast：屏幕底部居中，默认 2 秒后自动消失；点击内容展示完整文本用 3 秒
@@ -265,7 +316,8 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
     );
   }, []);
 
-  // 触屏设备点击标题/描述：内容被 line-clamp 截断时复用 Toast 展示完整文本（3 秒）
+  // 触屏设备点击标题/描述：内容被 line-clamp 截断时，将完整文本显示在「卡片上方」的提示框
+  // （而非屏幕底部 Toast），避免被手指遮挡，注意力停留在当前卡片位置。
   const handleContentClick = useCallback((
     event: React.MouseEvent<HTMLElement>,
     type: 'title' | 'desc'
@@ -276,10 +328,23 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
       ? event.currentTarget.querySelector('h3')
       : event.currentTarget.querySelector('p');
     if (!target) return;
-    // 仅当内容被截断（scrollHeight 超出 clientHeight）时才触发 Toast
+    // 仅当内容被截断（scrollHeight 超出 clientHeight）时才触发
     if (target.scrollHeight <= target.clientHeight) return;
-    showToast(type === 'title' ? link.name : (link.desc ?? ''), 3000);
-  }, [showToast, link.name, link.desc]);
+    // 锚定整张卡片，与桌面端 Tooltip 定位一致
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    setTouchTooltip({
+      show: true,
+      rect,
+      content: type === 'title' ? link.name : (link.desc ?? ''),
+    });
+    if (touchTimer.current) window.clearTimeout(touchTimer.current);
+    touchTimer.current = window.setTimeout(
+      () => setTouchTooltip({ show: false, rect: null, content: '' }),
+      3000
+    );
+  }, [link.name, link.desc]);
 
   const handleCopyCommand = useCallback(async () => {
     try {
@@ -326,6 +391,24 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
 
   useEffect(() => () => {
     if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    if (touchTimer.current) window.clearTimeout(touchTimer.current);
+  }, []);
+
+  // 移动端：页面/卡片滚动时立即关闭提示框（轻点弹框不该残留）
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!window.matchMedia('(hover: none)').matches) return; // 仅触屏设备
+    const closeAll = () => {
+      setTitleTooltip((s) => (s.show ? { show: false, rect: null } : s));
+      setDescTooltip((s) => (s.show ? { show: false, rect: null } : s));
+      setTouchTooltip((s) => (s.show ? { show: false, rect: null, content: '' } : s));
+    };
+    window.addEventListener('scroll', closeAll, true);
+    window.addEventListener('touchmove', closeAll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', closeAll, true);
+      window.removeEventListener('touchmove', closeAll);
+    };
   }, []);
 
   // 当 link 变化时更新图片源
@@ -391,6 +474,7 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
   return (
     <>
     <motion.div
+        ref={cardRef}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         data-has-color={cardColorData.applyColor ? 'true' : undefined}
@@ -566,21 +650,26 @@ const LinkCard = memo(function LinkCard({ link, className, showPromoBadge = fals
                       transition-colors duration-500" />
       </motion.div>
 
-      {/* 提示框 */}
+      {/* 提示框：锚定在整张卡片顶部之上，悬停标题显示标题，悬停描述显示描述 */}
       <Tooltip 
         content={link.name}
         show={titleTooltip.show}
-        x={titleTooltip.x}
-        y={titleTooltip.y}
+        cardRect={titleTooltip.rect}
       />
       {link.desc && (
         <Tooltip 
           content={link.desc}
           show={descTooltip.show}
-          x={descTooltip.x}
-          y={descTooltip.y}
+          cardRect={descTooltip.rect}
         />
       )}
+
+      {/* 触屏设备：点击被折叠标题/描述时，完整文本显示在卡片上方的提示框 */}
+      <Tooltip 
+        content={touchTooltip.content}
+        show={touchTooltip.show}
+        cardRect={touchTooltip.rect}
+      />
 
       {/* Toast 提示 */}
       <Toast msg={toast.msg} show={toast.show} />
